@@ -563,7 +563,7 @@ wss.on('connection', (ws) => {
 app.get('/health', (_, res) => res.json({ status: 'online', google: isGoogleAuthed() }));
 
 app.all('/ask', async (req, res) => {
-  const { message } = req.body;
+  const message = req.body?.message || req.query?.message;
   if (!message) return res.json({ reply: 'No message received.' });
   try { 
     const history = loadHistory();
@@ -577,7 +577,7 @@ app.all('/ask', async (req, res) => {
 });
 
 app.all('/ask', async (req, res) => {
-  const { message } = req.body;
+  const message = req.body?.message || req.query?.message;
   if (!message) return res.json({ reply: 'No message received.' });
   try {
     const history = loadHistory();
