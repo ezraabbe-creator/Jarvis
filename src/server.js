@@ -562,7 +562,7 @@ wss.on('connection', (ws) => {
 
 app.get('/health', (_, res) => res.json({ status: 'online', google: isGoogleAuthed() }));
 
-app.post('/ask', async (req, res) => {
+app.all('/ask', async (req, res) => {
   const { message } = req.body;
   if (!message) return res.json({ reply: 'No message received.' });
   try { 
@@ -576,7 +576,7 @@ app.post('/ask', async (req, res) => {
   }
 });
 
-app.post('/ask', async (req, res) => {
+app.all('/ask', async (req, res) => {
   const { message } = req.body;
   if (!message) return res.json({ reply: 'No message received.' });
   try {
