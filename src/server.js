@@ -565,7 +565,7 @@ app.get('/health', (_, res) => res.json({ status: 'online', google: isGoogleAuth
 app.post('/ask', async (req, res) => {
   const { message } = req.body;
   if (!message) return res.json({ reply: 'No message received.' });
-  try {
+  try { 
     const history = loadHistory();
     history.push({ role: 'user', content: message });
     const { reply, messages } = await runAgentLoop(history, () => {});
