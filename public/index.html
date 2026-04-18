@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>J.A.R.V.I.S.</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;900&family=Rajdhani:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --blue:     #00d4ff;
+  --blue-dim: #006e8a;
+  --blue-dk:  #003344;
+  --amber:    #ffb700;
+  --green:    #00ff99;
+  --red:      #ff4455;
+  --bg:       #020c14;
+  --surface:  #050f18;
+  --border:   #082030;
+  --text:     #c0e8f8;
+  --muted:    #2a5a70;
+  --glow:     0 0 10px rgba(0,212,255,0.6), 0 0 30px rgba(0,212,255,0.2);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 16px;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  grid-template-columns: 260px 1fr;
+  grid-template-areas:
+    "header header"
+    "sidebar main"
+    "input  input";
+  height: 100vh;
+}
+
+/* ─── Grid bg ─── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(0,212,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,255,0.025) 1px, transparent 1px);
+  background-size: 36px 36px;
+  pointer-events: none; z-index: 0;
+}
+
+/* ─── HEADER ─── */
+header {
+  grid-area: header;
+  display: flex; align-items: center; gap: 16px;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(2,12,20,0.9);
+  backdrop-filter: blur(10px);
+  position: relative; z-index: 10;
+}
+
+.arc {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  border: 2px solid var(--blue);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--glow);
+  position: relative;
+  animation: arc-pulse 3s ease-in-out infinite;
+  flex-shrink: 0;
+}
+.arc::before {
+  content: '';
+  position: absolute; inset: 4px;
+  border-radius: 50%;
+  border: 1px solid rgba(0,212,255,0.3);
+}
+.arc-core {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0%, var(--blue) 60%, transparent 100%);
+  box-shadow: 0 0 12px var(--blue), 0 0 24px var(--blue);
+}
+@keyframes arc-pulse {
+  0%,100% { box-shadow: var(--glow); }
+  50% { box-shadow: 0 0 20px var(--blue), 0 0 60px rgba(0,212,255,0.3); }
+}
+
+.brand h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.3rem; font-weight: 900;
+  letter-spacing: 0.35em;
+  color: var(--blue);
+  text-shadow: var(--glow);
+}
+.brand p {
+  font-size: 0.65rem; letter-spacing: 0.2em;
+  color: var(--muted); text-transform: uppercase;
+  margin-top: 1px;
+}
+
+.header-right {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 20px;
+}
+
+.status-pill {
+  display: flex; align-items: center; gap: 6px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.6rem; letter-spacing: 0.15em;
+  color: var(--green);
+  padding: 5px 10px;
+  border: 1px solid rgba(0,255,153,0.3);
+  border-radius: 2px;
+}
+.status-pill .live-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+  animation: blink 2s infinite;
+}
+
+.time-display {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.75rem; letter-spacing: 0.1em;
+  color: var(--muted);
+  text-align: right;
+}
+
+/* ─── SIDEBAR ─── */
+aside {
+  grid-area: sidebar;
+  border-right: 1px solid var(--border);
+  padding: 16px;
+  overflow-y: auto;
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column; gap: 16px;
+  background: rgba(2,8,14,0.5);
+}
+
+.panel-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.58rem; letter-spacing: 0.2em;
+  color: var(--blue-dim);
+  text-transform: uppercase;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2px;
+}
+
+/* Tool activity log */
+#tool-log {
+  display: flex; flex-direction: column; gap: 6px;
+  min-height: 60px;
+}
+
+.tool-entry {
+  background: rgba(0,212,255,0.04);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--blue-dim);
+  padding: 6px 8px;
+  border-radius: 1px;
+  font-size: 0.75rem;
+  animation: fadeSlide 0.3s ease;
+}
+.tool-entry .tool-name {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.6rem; letter-spacing: 0.1em;
+  color: var(--blue); margin-bottom: 2px;
+}
+.tool-entry .tool-detail {
+  color: var(--muted); font-size: 0.72rem;
+  white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tool-entry.done { border-left-color: var(--green); }
+.tool-entry.done .tool-name { color: var(--green); }
+
+/* Memory panel */
+#memory-list {
+  display: flex; flex-direction: column; gap: 4px;
+  font-size: 0.78rem;
+}
+.memory-item {
+  padding: 5px 8px;
+  background: rgba(255,183,0,0.05);
+  border: 1px solid rgba(255,183,0,0.15);
+  border-radius: 1px;
+  animation: fadeSlide 0.3s ease;
+}
+.memory-item .mem-key {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.58rem; color: var(--amber); letter-spacing: 0.1em;
+}
+.memory-item .mem-val { color: var(--text); margin-top: 1px; }
+
+/* Iteration tracker */
+.iter-bar {
+  display: flex; gap: 4px;
+}
+.iter-pip {
+  flex: 1; height: 4px;
+  background: var(--border); border-radius: 2px;
+  transition: background 0.3s;
+}
+.iter-pip.active { background: var(--blue); box-shadow: 0 0 4px var(--blue); }
+.iter-pip.done { background: var(--green); }
+
+/* Voice toggle */
+#voice-btn {
+  display: flex; align-items: center; gap: 8px;
+  background: transparent;
+  border: 1px solid var(--blue-dim);
+  color: var(--blue);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.6rem; letter-spacing: 0.12em;
+  padding: 8px 12px; width: 100%;
+  cursor: pointer; border-radius: 1px;
+  transition: all 0.2s;
+}
+#voice-btn:hover { background: rgba(0,212,255,0.08); }
+#voice-btn.listening {
+  border-color: var(--red);
+  color: var(--red);
+  box-shadow: 0 0 10px rgba(255,68,85,0.3);
+  animation: voice-pulse 1s ease-in-out infinite;
+}
+@keyframes voice-pulse {
+  0%,100% { box-shadow: 0 0 10px rgba(255,68,85,0.3); }
+  50% { box-shadow: 0 0 20px rgba(255,68,85,0.6); }
+}
+#voice-btn .mic-icon { font-size: 1rem; }
+
+/* TTS toggle */
+#tts-toggle {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.75rem; color: var(--muted);
+  cursor: pointer;
+}
+#tts-toggle input { accent-color: var(--blue); }
+#tts-toggle.on { color: var(--text); }
+
+/* ─── MAIN CHAT ─── */
+main {
+  grid-area: main;
+  overflow-y: auto;
+  padding: 20px 24px;
+  display: flex; flex-direction: column;
+  gap: 16px;
+  position: relative; z-index: 1;
+}
+
+main::-webkit-scrollbar { width: 3px; }
+main::-webkit-scrollbar-thumb { background: var(--border); }
+
+.msg {
+  display: flex; gap: 10px;
+  align-items: flex-start;
+  animation: fadeSlide 0.3s ease;
+  max-width: 820px;
+}
+.msg.user { flex-direction: row-reverse; align-self: flex-end; }
+
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.av {
+  width: 28px; height: 28px; border-radius: 50%;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Orbitron', sans-serif; font-size: 0.5rem; font-weight: 700;
+}
+.av.j { border: 1px solid var(--blue); color: var(--blue); }
+.av.u { border: 1px solid var(--muted); color: var(--muted); background: #0a1e2a; }
+
+.bubble-wrap { display: flex; flex-direction: column; gap: 3px; }
+.bubble-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.55rem; letter-spacing: 0.15em; color: var(--muted);
+}
+.msg.user .bubble-label { text-align: right; }
+
+.bubble {
+  padding: 10px 14px;
+  border-radius: 1px;
+  line-height: 1.6; font-size: 0.95rem;
+}
+.msg.jarvis .bubble {
+  background: rgba(0,212,255,0.04);
+  border: 1px solid rgba(0,212,255,0.15);
+  border-left: 3px solid var(--blue);
+  color: var(--text);
+}
+.msg.user .bubble {
+  background: rgba(0,212,255,0.07);
+  border: 1px solid rgba(0,212,255,0.15);
+  border-right: 3px solid var(--blue-dim);
+  color: #d8f0ff;
+}
+
+/* Thinking msg */
+.msg.thinking .bubble {
+  display: flex; gap: 5px; align-items: center; padding: 14px;
+  font-size: 0.8rem; color: var(--muted); font-style: italic;
+}
+.dots { display: flex; gap: 4px; margin-right: 4px; }
+.dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--blue);
+  animation: blink 1.2s infinite ease-in-out;
+}
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes blink {
+  0%,100% { opacity: 0.2; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+/* ─── INPUT BAR ─── */
+.input-bar {
+  grid-area: input;
+  display: flex; gap: 10px; align-items: center;
+  padding: 12px 24px 20px;
+  border-top: 1px solid var(--border);
+  background: rgba(2,12,20,0.95);
+  backdrop-filter: blur(10px);
+  position: relative; z-index: 10;
+}
+.input-bar::before {
+  content: '';
+  position: absolute; top: 0; left: 24px; right: 24px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--blue-dim), transparent);
+  opacity: 0.5;
+}
+
+#prompt {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1px;
+  color: var(--text);
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1rem; font-weight: 500;
+  padding: 10px 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  caret-color: var(--blue);
+}
+#prompt::placeholder { color: var(--muted); }
+#prompt:focus {
+  border-color: var(--blue-dim);
+  box-shadow: 0 0 0 2px rgba(0,212,255,0.07);
+}
+
+#send-btn {
+  background: transparent;
+  border: 1px solid var(--blue);
+  color: var(--blue);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.6rem; font-weight: 600;
+  letter-spacing: 0.12em;
+  padding: 10px 20px;
+  border-radius: 1px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+#send-btn:hover:not(:disabled) {
+  background: rgba(0,212,255,0.1);
+  box-shadow: var(--glow);
+}
+#send-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* Waveform bars (voice active) */
+.waveform {
+  display: none; gap: 3px; align-items: center; height: 24px;
+}
+.waveform.active { display: flex; }
+.wave-bar {
+  width: 3px; background: var(--red); border-radius: 2px;
+  animation: wave 0.8s ease-in-out infinite;
+}
+.wave-bar:nth-child(1) { animation-delay: 0s;   height: 6px; }
+.wave-bar:nth-child(2) { animation-delay: 0.1s; height: 14px; }
+.wave-bar:nth-child(3) { animation-delay: 0.2s; height: 20px; }
+.wave-bar:nth-child(4) { animation-delay: 0.3s; height: 14px; }
+.wave-bar:nth-child(5) { animation-delay: 0.4s; height: 8px; }
+@keyframes wave {
+  0%,100% { transform: scaleY(0.5); opacity: 0.6; }
+  50%      { transform: scaleY(1.4); opacity: 1; }
+}
+</style>
+</head>
+<body>
+
+<!-- ─── HEADER ─── -->
+<header>
+  <div class="arc"><div class="arc-core"></div></div>
+  <div class="brand">
+    <h1>J.A.R.V.I.S.</h1>
+    <p>Just A Rather Very Intelligent System</p>
+  </div>
+  <div class="header-right">
+    <div class="status-pill">
+      <div class="live-dot"></div>
+      SYSTEMS ONLINE
+    </div>
+    <div class="time-display" id="clock">--:-- --<br><span id="dateline"></span></div>
+  </div>
+</header>
+
+<!-- ─── SIDEBAR ─── -->
+<aside>
+
+  <!-- Voice -->
+  <div>
+    <div class="panel-title">Voice Interface</div>
+    <button id="voice-btn">
+      <span class="mic-icon">🎙️</span>
+      <span id="voice-label">ACTIVATE MIC</span>
+    </button>
+    <div class="waveform" id="waveform">
+      <div class="wave-bar"></div><div class="wave-bar"></div>
+      <div class="wave-bar"></div><div class="wave-bar"></div>
+      <div class="wave-bar"></div>
+    </div>
+  </div>
+
+  <!-- TTS -->
+  <div>
+    <div class="panel-title">Speech Output</div>
+    <label class="tts-toggle" id="tts-toggle">
+      <input type="checkbox" id="tts-check" checked />
+      Jarvis speaks responses
+    </label>
+  </div>
+
+  <!-- Agent iterations -->
+  <div>
+    <div class="panel-title">Agent Iterations</div>
+    <div class="iter-bar" id="iter-bar">
+      <div class="iter-pip" id="pip-0"></div>
+      <div class="iter-pip" id="pip-1"></div>
+      <div class="iter-pip" id="pip-2"></div>
+      <div class="iter-pip" id="pip-3"></div>
+      <div class="iter-pip" id="pip-4"></div>
+      <div class="iter-pip" id="pip-5"></div>
+      <div class="iter-pip" id="pip-6"></div>
+      <div class="iter-pip" id="pip-7"></div>
+      <div class="iter-pip" id="pip-8"></div>
+      <div class="iter-pip" id="pip-9"></div>
+    </div>
+  </div>
+
+  <!-- Tool activity -->
+  <div style="flex:1; min-height:0; display:flex; flex-direction:column;">
+    <div class="panel-title">Tool Activity</div>
+    <div id="tool-log" style="overflow-y:auto; flex:1;"><p style="font-size:0.75rem; color:var(--muted);">Idle</p></div>
+  </div>
+
+  <!-- Memory -->
+  <div>
+    <div class="panel-title">Active Memory</div>
+    <div id="memory-list"><p style="font-size:0.75rem; color:var(--muted);">Nothing stored yet</p></div>
+  </div>
+
+</aside>
+
+<!-- ─── CHAT ─── -->
+<main id="chat">
+  <div class="msg jarvis">
+    <div class="av j">AI</div>
+    <div class="bubble-wrap">
+      <div class="bubble-label">JARVIS</div>
+      <div class="bubble">All systems are operational, sir. I'm fully online — armed with web search, live weather, news, and memory. What would you like to tackle today?</div>
+    </div>
+  </div>
+</main>
+
+<!-- ─── INPUT ─── -->
+<div class="input-bar">
+  <input id="prompt" type="text" placeholder="Give Jarvis a command or question..." autocomplete="off" />
+  <button id="send-btn">SEND</button>
+</div>
+
+<script>
+// ─── CLOCK ───────────────────────────────────────────────────────────────────
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').childNodes[0].textContent =
+    now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + '\n';
+  document.getElementById('dateline').textContent =
+    now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+updateClock(); setInterval(updateClock, 1000);
+
+// ─── WEBSOCKET ────────────────────────────────────────────────────────────────
+const WS_URL = location.protocol === 'https:'
+  ? `wss://${location.host}`
+  : `ws://${location.host}`;
+let ws, busy = false, iterCount = 0;
+
+function connectWS() {
+  ws = new WebSocket(WS_URL);
+  ws.onopen  = () => console.log('WS connected');
+  ws.onclose = () => { console.log('WS closed, reconnecting...'); setTimeout(connectWS, 2000); };
+  ws.onmessage = (ev) => {
+    const msg = JSON.parse(ev.data);
+    handleServerMsg(msg);
+  };
+}
+connectWS();
+
+// ─── SERVER MESSAGE HANDLER ───────────────────────────────────────────────────
+function handleServerMsg(msg) {
+  if (msg.type === 'thinking') {
+    // Jarvis is pondering before tool use — update thinking bubble
+    const th = document.getElementById('thinking-bubble');
+    if (th) th.querySelector('.bubble-text').textContent = msg.text.slice(0, 80) + '…';
+  }
+
+  else if (msg.type === 'tools') {
+    iterCount++;
+    updatePips(iterCount);
+    msg.tools.forEach(t => addToolEntry(t.name, JSON.stringify(t.input).slice(0, 60), false));
+  }
+
+  else if (msg.type === 'tool_result') {
+    // Mark last tool entry done + handle memory updates
+    const entries = document.querySelectorAll('.tool-entry:not(.done)');
+    if (entries.length) entries[entries.length - 1].classList.add('done');
+
+    if (msg.tool === 'remember') {
+      refreshMemory();
+    }
+  }
+
+  else if (msg.type === 'reply') {
+    removeThinking();
+    addMsg('jarvis', msg.text);
+    if (document.getElementById('tts-check').checked) speak(msg.text);
+    resetPips();
+    setBusy(false);
+  }
+}
+
+// ─── CHAT HELPERS ─────────────────────────────────────────────────────────────
+const chat = document.getElementById('chat');
+
+function addMsg(role, text) {
+  const isJ = role === 'jarvis';
+  const div = document.createElement('div');
+  div.className = `msg ${isJ ? 'jarvis' : 'user'}`;
+  div.innerHTML = `
+    <div class="av ${isJ ? 'j' : 'u'}">${isJ ? 'AI' : 'ME'}</div>
+    <div class="bubble-wrap">
+      <div class="bubble-label">${isJ ? 'JARVIS' : 'YOU'}</div>
+      <div class="bubble">${text.replace(/\n/g, '<br>')}</div>
+    </div>`;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function addThinking() {
+  const div = document.createElement('div');
+  div.className = 'msg jarvis thinking';
+  div.id = 'thinking-bubble';
+  div.innerHTML = `
+    <div class="av j">AI</div>
+    <div class="bubble-wrap">
+      <div class="bubble-label">JARVIS</div>
+      <div class="bubble">
+        <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+        <span class="bubble-text">Processing request…</span>
+      </div>
+    </div>`;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function removeThinking() {
+  const t = document.getElementById('thinking-bubble');
+  if (t) t.remove();
+}
+
+// ─── TOOL LOG ─────────────────────────────────────────────────────────────────
+const toolLog = document.getElementById('tool-log');
+let firstTool = true;
+
+function addToolEntry(name, detail, done) {
+  if (firstTool) { toolLog.innerHTML = ''; firstTool = false; }
+  const div = document.createElement('div');
+  div.className = `tool-entry${done ? ' done' : ''}`;
+  div.innerHTML = `<div class="tool-name">${name.replace('_', ' ').toUpperCase()}</div>
+                   <div class="tool-detail">${detail}</div>`;
+  toolLog.appendChild(div);
+  toolLog.scrollTop = toolLog.scrollHeight;
+}
+
+// ─── MEMORY PANEL ─────────────────────────────────────────────────────────────
+const memoryStore = {};
+const memList = document.getElementById('memory-list');
+
+function refreshMemory() {
+  // We parse tool results to extract memory — simplified approach
+  const all = document.querySelectorAll('.tool-entry.done');
+  all.forEach(e => {
+    const name = e.querySelector('.tool-name').textContent;
+    if (name.includes('REMEMBER')) {
+      const detail = e.querySelector('.tool-detail').textContent;
+      const m = detail.match(/"key":"([^"]+)","value":"([^"]+)"/);
+      if (m) memoryStore[m[1]] = m[2];
+    }
+  });
+  if (!Object.keys(memoryStore).length) return;
+  memList.innerHTML = '';
+  Object.entries(memoryStore).forEach(([k, v]) => {
+    const div = document.createElement('div');
+    div.className = 'memory-item';
+    div.innerHTML = `<div class="mem-key">${k}</div><div class="mem-val">${v}</div>`;
+    memList.appendChild(div);
+  });
+}
+
+// ─── ITERATION PIPS ──────────────────────────────────────────────────────────
+function updatePips(n) {
+  for (let i = 0; i < 10; i++) {
+    const pip = document.getElementById(`pip-${i}`);
+    if (i < n - 1) pip.className = 'iter-pip done';
+    else if (i === n - 1) pip.className = 'iter-pip active';
+    else pip.className = 'iter-pip';
+  }
+}
+function resetPips() {
+  iterCount = 0;
+  for (let i = 0; i < 10; i++) document.getElementById(`pip-${i}`).className = 'iter-pip';
+}
+
+// ─── SEND ─────────────────────────────────────────────────────────────────────
+const input = document.getElementById('prompt');
+const sendBtn = document.getElementById('send-btn');
+
+function setBusy(b) {
+  busy = b;
+  sendBtn.disabled = b;
+  input.disabled = b;
+}
+
+function send(text) {
+  const t = (text || input.value).trim();
+  if (!t || busy || !ws || ws.readyState !== 1) return;
+  input.value = '';
+  setBusy(true);
+  firstTool = true;
+  toolLog.innerHTML = '<p style="font-size:0.75rem; color:var(--muted);">Idle</p>';
+  addMsg('user', t);
+  addThinking();
+  ws.send(JSON.stringify({ type: 'message', text: t }));
+}
+
+sendBtn.addEventListener('click', () => send());
+input.addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
+
+// ─── TEXT-TO-SPEECH ───────────────────────────────────────────────────────────
+let voices = [];
+speechSynthesis.onvoiceschanged = () => { voices = speechSynthesis.getVoices(); };
+
+function speak(text) {
+  if (!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const clean = text.replace(/<[^>]+>/g, '').slice(0, 500); // limit length
+  const utt = new SpeechSynthesisUtterance(clean);
+  // Try to find a deep male voice
+  const preferred = voices.find(v => /daniel|google uk|male/i.test(v.name))
+    || voices.find(v => v.lang === 'en-GB')
+    || voices[0];
+  if (preferred) utt.voice = preferred;
+  utt.rate = 0.95; utt.pitch = 0.85; utt.volume = 1;
+  speechSynthesis.speak(utt);
+}
+
+// ─── SPEECH RECOGNITION ───────────────────────────────────────────────────────
+const voiceBtn = document.getElementById('voice-btn');
+const voiceLabel = document.getElementById('voice-label');
+const waveform = document.getElementById('waveform');
+let recognition = null, listening = false;
+
+if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
+
+  recognition.onresult = (ev) => {
+    const transcript = Array.from(ev.results).map(r => r[0].transcript).join('');
+    input.value = transcript;
+    if (ev.results[0].isFinal) {
+      stopListening();
+      send(transcript);
+    }
+  };
+
+  recognition.onend = stopListening;
+  recognition.onerror = stopListening;
+
+  voiceBtn.addEventListener('click', () => {
+    if (listening) stopListening();
+    else startListening();
+  });
+} else {
+  voiceBtn.disabled = true;
+  voiceLabel.textContent = 'NOT SUPPORTED';
+}
+
+function startListening() {
+  listening = true;
+  voiceBtn.classList.add('listening');
+  voiceLabel.textContent = 'LISTENING...';
+  waveform.classList.add('active');
+  input.placeholder = 'Speak now...';
+  recognition.start();
+  speechSynthesis.cancel(); // stop Jarvis talking while we listen
+}
+function stopListening() {
+  listening = false;
+  voiceBtn.classList.remove('listening');
+  voiceLabel.textContent = 'ACTIVATE MIC';
+  waveform.classList.remove('active');
+  input.placeholder = 'Give Jarvis a command or question...';
+  try { recognition.stop(); } catch {}
+}
+
+// TTS toggle label
+const ttsCheck = document.getElementById('tts-check');
+const ttsToggle = document.getElementById('tts-toggle');
+ttsCheck.addEventListener('change', () => {
+  ttsToggle.classList.toggle('on', ttsCheck.checked);
+});
+ttsToggle.classList.add('on');
+</script>
+</body>
+</html>
