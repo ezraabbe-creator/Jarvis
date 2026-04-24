@@ -440,19 +440,17 @@ function qs(text){inp.value=text;send(text);}
 sbtn.addEventListener('click',()=>send());
 inp.addEventListener('keydown',e=>{if(e.key==='Enter')send();});
 
+const ELEVEN_KEY='9c0c6f69ff3d859eb629a5cecc1be7ce65a6041ca525ce942d90f3e4d105aa52';
 let voices=[];
 speechSynthesis.onvoiceschanged=()=>{voices=speechSynthesis.getVoices();};
 async function speak(text){
   const clean=text.replace(/<[^>]+>/g,'').replace(/\*\*/g,'').slice(0,500);
   try{
-    const res=await fetch('/speak',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:clean})});
+    const res=await fetch(`https://api.elevenlabs.io/v1/text-to-speech/dajyHYsFViAKDAwOeHy7`,{method:'POST',headers:{'Content-Type':'application/json','xi-api-key':ELEVEN_KEY},body:JSON.stringify({text:clean,model_id:'eleven_turbo_v2_5',voice_settings:{stability:0.4,similarity_boost:0.85,style:0.3,use_speaker_boost:true}})});
     if(!res.ok) throw new Error('ElevenLabs failed');
-    const blob=await res.blob();
-    const url=URL.createObjectURL(blob);
-    const audio=new Audio(url);
-    audio.play();
-    audio.onended=()=>URL.revokeObjectURL(url);
-  }catch{
+    const blob=await res.blob();const url=URL.createObjectURL(blob);const audio=new Audio(url);audio.play();audio.onended=()=>URL.revokeObjectURL(url);
+  }catch(e){
+    console.log('ElevenLabs failed, using browser TTS',e);
     if(!('speechSynthesis' in window))return;
     speechSynthesis.cancel();
     const utt=new SpeechSynthesisUtterance(clean);
@@ -479,3 +477,6 @@ if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch
 </script>
 </body>
 </html>
+
+
+
