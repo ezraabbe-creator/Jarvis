@@ -501,6 +501,7 @@ function qs(text){inp.value=text;send(text);}
 sbtn.addEventListener('click',()=>send());
 inp.addEventListener('keydown',e=>{if(e.key==='Enter')send();});
 
+const ELEVEN_KEY='your-elevenlabs-api-key-here';
 let voices=[];
 speechSynthesis.onvoiceschanged=()=>{voices=speechSynthesis.getVoices();};
 function speak(text){
