@@ -407,7 +407,7 @@ function updateMem(result){
   if(m){
     memStore[m[1]]=m[2];memCount=Object.keys(memStore).length;
     document.getElementById('s-mem').textContent=memCount;
-    const pct=Math.min(100,memCount*10);
+    const pct=Math.min(100,Math.round((memCount/60)*100));
     document.getElementById('memfill').style.height=pct+'%';
     document.getElementById('mempct').textContent=pct+'%';
     memList.innerHTML='';
