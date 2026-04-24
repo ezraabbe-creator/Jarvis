@@ -562,6 +562,33 @@ wss.on('connection', (ws) => {
 
 app.get('/health', (_, res) => res.json({ status: 'online', google: isGoogleAuthed() }));
 
+app.post('/speak', async (req, res) => {
+  const { text } = req.body;
+  if (!text) return res.status(400).json({ error: 'No text' });
+  if (!process.env.ELEVENLABS_API_KEY) return res.status(503).json({ error: 'No ElevenLabs key' });
+  try {
+    const voiceId = 'onwK4e9ZLuTAKqWW03F9'; // Daniel - closest to Jarvis
+    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+      method: 'POST',
+      headers: {
+        'xi-api-key': process.env.ELEVENLABS_API_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        text,
+        model_id: 'eleven_monolingual_v1',
+        voice_settings: { stability: 0.4, similarity_boost: 0.85, style: 0.3, use_speaker_boost: true }
+      })
+    });
+    if (!response.ok) throw new Error('ElevenLabs error');
+    const buffer = await response.arrayBuffer();
+    res.set('Content-Type', 'audio/mpeg');
+    res.send(Buffer.from(buffer));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.all('/ask', async (req, res) => {
   const message = req.body?.message || req.query?.message;
   if (!message) return res.json({ reply: 'No message received.' });
