@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="JARVIS" />
+<meta name="theme-color" content="#080808" />
+<link rel="manifest" href="/manifest.json" />
+<link rel="apple-touch-icon" href="/icon-192.png" />
+<title>J.A.R.V.I.S.</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --bg: #080808;
+  --surface: #0f0f0f;
+  --border: #1a1a1a;
+  --border-light: #242424;
+  --text: #e8e8e8;
+  --text-dim: #666;
+  --text-muted: #333;
+  --green: #4ade80;
+  --red: #f87171;
+  --amber: #fbbf24;
+  --mono: 'DM Mono', monospace;
+  --sans: 'Syne', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  height: 100%;
+  display: grid;
+  grid-template-rows: 56px 1fr 72px;
+  grid-template-columns: 200px 1fr;
+  grid-template-areas: "header header" "sidebar main" "input input";
+  overflow: hidden;
+}
+header {
+  grid-area: header;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  z-index: 10;
+}
+.logo { display: flex; align-items: center; gap: 12px; }
+.logo-mark { width: 22px; height: 22px; }
+.logo-mark svg { width: 100%; height: 100%; }
+.logo-text { font-family: var(--sans); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.28em; color: var(--text); }
+.header-meta { display: flex; align-items: center; gap: 20px; }
+.status-indicator { display: flex; align-items: center; gap: 6px; font-size: 0.62rem; letter-spacing: 0.1em; color: var(--text-dim); }
+.status-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); animation: pulse 3s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+#clock { font-size: 0.62rem; letter-spacing: 0.05em; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+aside {
+  grid-area: sidebar;
+  border-right: 1px solid var(--border);
+  padding: 20px 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+aside::-webkit-scrollbar { width: 0; }
+.sidebar-section { padding: 0 16px 18px; border-bottom: 1px solid var(--border); margin-bottom: 18px; }
+.sidebar-section:last-child { border-bottom: none; margin-bottom: 0; }
+.sidebar-label { font-size: 0.54rem; letter-spacing: 0.2em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 10px; font-family: var(--sans); font-weight: 600; }
+#voice-btn {
+  width: 100%; background: transparent; border: 1px solid var(--border-light);
+  color: var(--text-dim); font-family: var(--mono); font-size: 0.63rem;
+  letter-spacing: 0.1em; padding: 8px 10px; cursor: pointer; transition: all 0.15s;
+  display: flex; align-items: center; gap: 7px; text-transform: uppercase;
+}
+#voice-btn:hover { border-color: #444; color: var(--text); }
+#voice-btn.listening { border-color: var(--red); color: var(--red); background: rgba(248,113,113,0.05); }
+.waveform { display: none; gap: 2px; align-items: center; height: 14px; margin-top: 7px; }
+.waveform.active { display: flex; }
+.wave-bar { width: 2px; background: var(--red); border-radius: 1px; animation: wave 0.8s ease-in-out infinite; }
+.wave-bar:nth-child(1) { height: 4px; } .wave-bar:nth-child(2) { height: 9px; animation-delay:.1s; }
+.wave-bar:nth-child(3) { height: 14px; animation-delay:.2s; } .wave-bar:nth-child(4) { height: 9px; animation-delay:.3s; }
+.wave-bar:nth-child(5) { height: 4px; animation-delay:.4s; }
+@keyframes wave { 0%,100% { transform: scaleY(0.5); } 50% { transform: scaleY(1); } }
+.tts-row { display: flex; align-items: center; gap: 7px; font-size: 0.62rem; color: var(--text-dim); cursor: pointer; margin-top: 8px; }
+.tts-row input { accent-color: var(--text); width: 11px; height: 11px; }
+.pips { display: flex; gap: 2px; margin-top: 6px; }
+.pip { height: 2px; flex: 1; background: var(--border-light); transition: background 0.2s; }
+.pip.active { background: var(--text); } .pip.done { background: var(--green); }
+#tool-log { display: flex; flex-direction: column; gap: 4px; max-height: 150px; overflow-y: auto; }
+#tool-log::-webkit-scrollbar { width: 0; }
+.tool-item { padding: 4px 7px; border-left: 1px solid var(--border-light); font-size: 0.58rem; line-height: 1.4; animation: fadeIn 0.2s ease; }
+.tool-item.done { border-left-color: var(--green); }
+.tool-name-label { color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.54rem; }
+.tool-item.done .tool-name-label { color: var(--green); }
+.tool-detail-text { color: var(--text-muted); margin-top: 1px; }
+#memory-list { display: flex; flex-direction: column; gap: 4px; }
+.mem-item { font-size: 0.6rem; line-height: 1.4; animation: fadeIn 0.2s ease; }
+.mem-key { color: var(--amber); font-size: 0.54rem; text-transform: uppercase; letter-spacing: 0.1em; }
+.mem-val { color: var(--text-dim); }
+@keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+main { grid-area: main; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+main::-webkit-scrollbar { width: 3px; }
+main::-webkit-scrollbar-thumb { background: var(--border-light); }
+.msg { display: flex; gap: 14px; animation: fadeIn 0.25s ease; max-width: 700px; }
+.msg.user { flex-direction: row-reverse; align-self: flex-end; }
+.msg-avatar { width: 22px; height: 22px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 0.48rem; letter-spacing: 0.05em; color: var(--text-muted); margin-top: 2px; font-family: var(--sans); font-weight: 700; }
+.msg-body { display: flex; flex-direction: column; gap: 3px; }
+.msg-role { font-size: 0.54rem; letter-spacing: 0.15em; color: var(--text-muted); text-transform: uppercase; font-family: var(--sans); }
+.msg.user .msg-role { text-align: right; }
+.bubble { font-size: 0.84rem; line-height: 1.7; color: var(--text); padding: 10px 14px; border: 1px solid var(--border); }
+.msg.jarvis .bubble { border-left: 2px solid var(--border-light); background: var(--surface); }
+.msg.user .bubble { border-right: 2px solid var(--border-light); background: transparent; color: var(--text-dim); }
+.thinking-dots { display: flex; gap: 4px; align-items: center; padding: 12px 14px; border: 1px solid var(--border); border-left: 2px solid var(--border-light); background: var(--surface); }
+.thinking-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--text-muted); animation: blink 1.2s infinite ease-in-out; }
+.thinking-dot:nth-child(2) { animation-delay: 0.2s; } .thinking-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes blink { 0%,100% { opacity:0.2; } 50% { opacity:1; } }
+.input-bar { grid-area: input; display: flex; align-items: center; border-top: 1px solid var(--border); background: var(--bg); z-index: 10; }
+#prompt { flex: 1; background: transparent; border: none; color: var(--text); font-family: var(--mono); font-size: 0.84rem; padding: 0 24px; height: 100%; outline: none; caret-color: var(--text); }
+#prompt::placeholder { color: var(--text-muted); }
+.input-divider { width: 1px; height: 22px; background: var(--border-light); }
+#send-btn { background: transparent; border: none; color: var(--text-dim); font-family: var(--sans); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.15em; padding: 0 24px; height: 100%; cursor: pointer; transition: color 0.15s; text-transform: uppercase; }
+#send-btn:hover:not(:disabled) { color: var(--text); }
+#send-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+@media (max-width: 600px) {
+  body { grid-template-columns: 1fr; grid-template-rows: 48px 1fr 60px; grid-template-areas: "header" "main" "input"; }
+  aside { display: none; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="10" stroke="#333" stroke-width="1"/>
+        <circle cx="12" cy="12" r="6" stroke="#444" stroke-width="1"/>
+        <circle cx="12" cy="12" r="2" fill="#e8e8e8"/>
+        <line x1="12" y1="2" x2="12" y2="6" stroke="#333" stroke-width="1"/>
+        <line x1="12" y1="18" x2="12" y2="22" stroke="#333" stroke-width="1"/>
+        <line x1="2" y1="12" x2="6" y2="12" stroke="#333" stroke-width="1"/>
+        <line x1="18" y1="12" x2="22" y2="12" stroke="#333" stroke-width="1"/>
+      </svg>
+    </div>
+    <span class="logo-text">J.A.R.V.I.S.</span>
+  </div>
+  <div class="header-meta">
+    <div class="status-indicator"><div class="status-dot"></div>ONLINE</div>
+    <div id="clock">--:--:--</div>
+  </div>
+</header>
+
+<aside>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Voice</div>
+    <button id="voice-btn"><span>○</span><span id="voice-label">Activate</span></button>
+    <div class="waveform" id="waveform">
+      <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+      <div class="wave-bar"></div><div class="wave-bar"></div>
+    </div>
+    <label class="tts-row"><input type="checkbox" id="tts-check" checked />Speak responses</label>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Agent</div>
+    <div class="pips">
+      <div class="pip" id="pip-0"></div><div class="pip" id="pip-1"></div><div class="pip" id="pip-2"></div>
+      <div class="pip" id="pip-3"></div><div class="pip" id="pip-4"></div><div class="pip" id="pip-5"></div>
+      <div class="pip" id="pip-6"></div><div class="pip" id="pip-7"></div><div class="pip" id="pip-8"></div>
+      <div class="pip" id="pip-9"></div>
+    </div>
+  </div>
+  <div class="sidebar-section" style="flex:1;min-height:0;display:flex;flex-direction:column;">
+    <div class="sidebar-label">Tools</div>
+    <div id="tool-log"><span style="font-size:0.58rem;color:var(--text-muted);">idle</span></div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Memory</div>
+    <div id="memory-list"><span style="font-size:0.58rem;color:var(--text-muted);">empty</span></div>
+  </div>
+</aside>
+
+<main id="chat">
+  <div class="msg jarvis">
+    <div class="msg-avatar">AI</div>
+    <div class="msg-body">
+      <div class="msg-role">Jarvis</div>
+      <div class="bubble">All systems operational. How can I assist you?</div>
+    </div>
+  </div>
+</main>
+
+<div class="input-bar">
+  <input id="prompt" type="text" placeholder="Message Jarvis..." autocomplete="off" />
+  <div class="input-divider"></div>
+  <button id="send-btn">Send</button>
+</div>
+
+<script>
+function tick() { document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-US',{hour12:false}); }
+tick(); setInterval(tick,1000);
+
+const WS_URL = location.protocol==='https:' ? `wss://${location.host}` : `ws://${location.host}`;
+let ws, busy=false, iterCount=0;
+function connectWS() { ws=new WebSocket(WS_URL); ws.onopen=()=>{}; ws.onclose=()=>setTimeout(connectWS,2000); ws.onmessage=(ev)=>handle(JSON.parse(ev.data)); }
+connectWS();
+
+function handle(msg) {
+  if (msg.type==='thinking') { const t=document.getElementById('thinking-msg'); if(t) t.querySelector('.thinking-text').textContent=msg.text.slice(0,60)+'…'; }
+  else if (msg.type==='tools') { iterCount++; updatePips(); msg.tools.forEach(t=>addTool(t.name,JSON.stringify(t.input).slice(0,50),false)); }
+  else if (msg.type==='tool_result') { const last=document.querySelector('.tool-item:not(.done)'); if(last) last.classList.add('done'); if(msg.tool==='remember') updateMemory(msg.result); }
+  else if (msg.type==='reply') { removeThinking(); addMsg('jarvis',msg.text); if(document.getElementById('tts-check').checked) speak(msg.text); resetPips(); setBusy(false); }
+}
+
+const chat=document.getElementById('chat');
+function addMsg(role,text) {
+  const isJ=role==='jarvis';
+  const div=document.createElement('div');
+  div.className=`msg ${isJ?'jarvis':'user'}`;
+  div.innerHTML=`<div class="msg-avatar">${isJ?'AI':'ME'}</div><div class="msg-body"><div class="msg-role">${isJ?'Jarvis':'You'}</div><div class="bubble">${text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div></div>`;
+  chat.appendChild(div); chat.scrollTop=chat.scrollHeight;
+}
+function addThinking() {
+  const div=document.createElement('div'); div.className='msg jarvis'; div.id='thinking-msg';
+  div.innerHTML=`<div class="msg-avatar">AI</div><div class="msg-body"><div class="msg-role">Jarvis</div><div class="thinking-dots"><div class="thinking-dot"></div><div class="thinking-dot"></div><div class="thinking-dot"></div><span class="thinking-text" style="font-size:0.66rem;color:var(--text-muted);margin-left:6px;"></span></div></div>`;
+  chat.appendChild(div); chat.scrollTop=chat.scrollHeight;
+}
+function removeThinking() { const t=document.getElementById('thinking-msg'); if(t) t.remove(); }
+
+const toolLog=document.getElementById('tool-log');
+let firstTool=true;
+function addTool(name,detail,done) {
+  if(firstTool){toolLog.innerHTML='';firstTool=false;}
+  const div=document.createElement('div'); div.className=`tool-item${done?' done':''}`;
+  div.innerHTML=`<div class="tool-name-label">${name.replace(/_/g,' ')}</div><div class="tool-detail-text">${detail}</div>`;
+  toolLog.appendChild(div); toolLog.scrollTop=toolLog.scrollHeight;
+}
+
+const memStore={}, memList=document.getElementById('memory-list');
+function updateMemory(result) {
+  const m=result.match(/Saved: "([^"]+)" = "([^"]+)"/);
+  if(m) { memStore[m[1]]=m[2]; memList.innerHTML=''; Object.entries(memStore).forEach(([k,v])=>{ const d=document.createElement('div'); d.className='mem-item'; d.innerHTML=`<div class="mem-key">${k}</div><div class="mem-val">${v}</div>`; memList.appendChild(d); }); }
+}
+
+function updatePips() { for(let i=0;i<10;i++){const p=document.getElementById(`pip-${i}`); p.className='pip'+(i<iterCount-1?' done':i===iterCount-1?' active':'');} }
+function resetPips() { iterCount=0; for(let i=0;i<10;i++) document.getElementById(`pip-${i}`).className='pip'; }
+
+const input=document.getElementById('prompt'), sendBtn=document.getElementById('send-btn');
+function setBusy(b){busy=b;sendBtn.disabled=b;input.disabled=b;}
+function send(text) {
+  const t=(text||input.value).trim();
+  if(!t||busy||!ws||ws.readyState!==1) return;
+  input.value=''; setBusy(true); firstTool=true;
+  toolLog.innerHTML='<span style="font-size:0.58rem;color:var(--text-muted);">working...</span>';
+  addMsg('user',t); addThinking();
+  ws.send(JSON.stringify({type:'message',text:t}));
+}
+sendBtn.addEventListener('click',()=>send());
+input.addEventListener('keydown',e=>{if(e.key==='Enter')send();});
+
+let voices=[];
+speechSynthesis.onvoiceschanged=()=>{voices=speechSynthesis.getVoices();};
+function speak(text) {
+  if(!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const clean=text.replace(/<[^>]+>/g,'').replace(/\*\*/g,'').slice(0,400);
+  const utt=new SpeechSynthesisUtterance(clean);
+  const preferred=voices.find(v=>/daniel|google uk|male/i.test(v.name))||voices.find(v=>v.lang==='en-GB')||voices[0];
+  if(preferred) utt.voice=preferred;
+  utt.rate=0.92; utt.pitch=0.85; utt.volume=1;
+  speechSynthesis.speak(utt);
+}
+
+const voiceBtn=document.getElementById('voice-btn'), voiceLabel=document.getElementById('voice-label'), waveform=document.getElementById('waveform');
+let recognition=null, listening=false;
+if('webkitSpeechRecognition' in window||'SpeechRecognition' in window) {
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  recognition=new SR(); recognition.continuous=false; recognition.interimResults=true; recognition.lang='en-US';
+  recognition.onresult=(ev)=>{const t=Array.from(ev.results).map(r=>r[0].transcript).join('');input.value=t;if(ev.results[0].isFinal){stopListening();send(t);}};
+  recognition.onend=stopListening; recognition.onerror=stopListening;
+  voiceBtn.addEventListener('click',()=>{if(listening)stopListening();else startListening();});
+} else { voiceBtn.disabled=true; voiceLabel.textContent='Not supported'; }
+
+function startListening(){listening=true;voiceBtn.classList.add('listening');voiceLabel.textContent='Listening...';waveform.classList.add('active');speechSynthesis.cancel();recognition.start();}
+function stopListening(){listening=false;voiceBtn.classList.remove('listening');voiceLabel.textContent='Activate';waveform.classList.remove('active');try{recognition.stop();}catch{}}
+
+if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
+</script>
+</body>
+</html>
