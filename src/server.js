@@ -1,4 +1,4 @@
-import 'dotenv/config';
+﻿import 'dotenv/config';
 import express from 'express';
 import { WebSocketServer } from 'ws';
 import { createServer } from 'http';
@@ -58,7 +58,8 @@ app.get('/auth/google', (req, res) => {
       'https://www.googleapis.com/auth/drive',
       'https://www.googleapis.com/auth/classroom.courses.readonly',
       'https://www.googleapis.com/auth/classroom.coursework.me.readonly',
-      'https://www.googleapis.com/auth/userinfo.email'
+      'https://www.googleapis.com/auth/userinfo.email',
+      'https://www.googleapis.com/auth/calendar.readonly'
     ]
   });
   res.redirect(url);
@@ -90,6 +91,7 @@ const TOOLS = [
   { name: 'list_memories', description: 'List all memories.', input_schema: { type: 'object', properties: {}, required: [] } },
   { name: 'forget', description: 'Delete a memory.', input_schema: { type: 'object', properties: { key: { type: 'string' } }, required: ['key'] } },
   { name: 'check_google_auth', description: 'Check if Google is connected.', input_schema: { type: 'object', properties: {}, required: [] } },
+  { name: 'get_calendar', description: 'Get upcoming calendar events. Can filter by date range.', input_schema: { type: 'object', properties: { days: { type: 'number', description: 'How many days ahead to look, default 7' } }, required: [] } },
   {
     name: 'get_canvas_assignments',
     description: 'Get assignments from Canvas. course_id can be "all". filter can be "missing" for unsubmitted, "future" for upcoming, or omit for all.',
@@ -177,6 +179,27 @@ async function executeTool(name, input) {
       case 'recall': { const item = persistentMemory[input.key]; return item ? `"${input.key}": ${item.value}` : `No memory for "${input.key}".`; }
       case 'list_memories': { const keys = Object.keys(persistentMemory); return keys.length ? 'Memories:\n' + keys.map(k => `• ${k}: ${persistentMemory[k].value}`).join('\n') : 'No memories.'; }
       case 'forget': { if (persistentMemory[input.key]) { delete persistentMemory[input.key]; saveMemory(persistentMemory); return `Forgot "${input.key}"`; } return `No memory for "${input.key}"`; }
+      case 'get_calendar': {
+        if (!isGoogleAuthed()) return 'Google not connected.';
+        const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+        const days = input.days || 7;
+        const now = new Date();
+        const future = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
+        const res = await calendar.events.list({
+          calendarId: 'primary',
+          timeMin: now.toISOString(),
+          timeMax: future.toISOString(),
+          singleEvents: true,
+          orderBy: 'startTime',
+          maxResults: 20
+        });
+        const events = res.data.items || [];
+        if (!events.length) return `No events found in the next ${days} days.`;
+        return `Upcoming events (next ${days} days):\n` + events.map(e => {
+          const start = e.start.dateTime ? new Date(e.start.dateTime).toLocaleString() : e.start.date;
+          return `• ${e.summary} — ${start}${e.location ? ' @ ' + e.location : ''}`;
+        }).join('\n');
+      }
       case 'check_google_auth': {
         if (isGoogleAuthed()) return 'Google account is connected.';
         const host = process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : 'http://localhost:3000';
