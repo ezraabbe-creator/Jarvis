@@ -567,7 +567,7 @@ app.post('/speak', async (req, res) => {
   if (!text) return res.status(400).json({ error: 'No text' });
   if (!process.env.ELEVENLABS_API_KEY) return res.status(503).json({ error: 'No ElevenLabs key' });
   try {
-    const voiceId = 'onwK4e9ZLuTAKqWW03F9'; // Daniel - closest to Jarvis
+    const voiceId = 'dajyHYsFViAKDAwOeHy7'; // Daniel - closest to Jarvis
     const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
       method: 'POST',
       headers: {
