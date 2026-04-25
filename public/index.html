@@ -490,14 +490,6 @@ async function speak(text){
   }
 }
 
-    const utt=new SpeechSynthesisUtterance(clean);
-    const pref=voices.find(v=>/daniel|google uk|male/i.test(v.name))||voices.find(v=>v.lang==='en-GB')||voices[0];
-    if(pref)utt.voice=pref;
-    utt.rate=0.92;utt.pitch=0.85;utt.volume=1;
-    speechSynthesis.speak(utt);
-  }
-}
-
 const vbtn=document.getElementById('vbtn'),vlbl=document.getElementById('vlbl'),wvf=document.getElementById('wvf');
 let recognition=null,listening=false;
 if('webkitSpeechRecognition' in window||'SpeechRecognition' in window){
