@@ -684,6 +684,23 @@ wss.on('connection', (ws) => {
 
 app.get('/health', (_, res) => res.json({ status: 'online', google: isGoogleAuthed() }));
 
+app.get('/api/weather', async (_, res) => {
+  if (!process.env.WEATHER_API_KEY) return res.status(503).json({ error: 'No weather key' });
+  try {
+    const r = await fetch(https://api.weatherapi.com/v1/forecast.json?key=+""+$+"{process.env.WEATHER_API_KEY}&q=Camarillo,CA&days=3&aqi=no`);
+    const d = await r.json();
+    res.json(d);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get('/api/news', async (_, res) => {
+  try {
+    const r = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://feeds.bbci.co.uk/news/rss.xml&count=10');
+    const d = await r.json();
+    res.json(d.items || []);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 app.post('/speak', async (req, res) => {
   const { text } = req.body;
   if (!text) return res.status(400).json({ error: 'No text' });

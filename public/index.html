@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -140,7 +140,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 <div class="topbar">
   <div class="logo">
     <div class="logo-icon"><div class="logo-core"></div></div>
-    <div><div class="logo-txt">J.A.R.V.I.S.</div><div class="logo-ver">VER 2.0 · STARK INDUSTRIES</div></div>
+    <div><div class="logo-txt">J.A.R.V.I.S.</div><div class="logo-ver">VER 2.0 Â· STARK INDUSTRIES</div></div>
   </div>
   <div class="top-center">
     <div class="top-stat"><div class="top-stat-n" id="s-mem">0</div><div class="top-stat-l">Memory</div></div>
@@ -159,7 +159,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 <div class="left">
   <div class="pblock">
     <div class="plabel">Voice Interface</div>
-    <button id="vbtn"><span>⬤</span><span id="vlbl">ACTIVATE MIC</span></button>
+    <button id="vbtn"><span>â¬¤</span><span id="vlbl">ACTIVATE MIC</span></button>
     <div class="wvform" id="wvf"><div class="wbar"></div><div class="wbar"></div><div class="wbar"></div><div class="wbar"></div><div class="wbar"></div></div>
     <label class="ttsrow"><input type="checkbox" id="ttsc" checked/>Speak responses</label>
   </div>
@@ -177,14 +177,14 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
   <div class="pblock">
     <div class="plabel">Projects</div>
     <button onclick="window.open('https://docs.google.com/document/d/1xa34Ix7-pBrfw65LP2DbQzceZxNcPQxXocFyMNvSKuw/edit','_blank')" style="width:100%;background:transparent;border:1px solid rgba(255,140,0,0.4);color:var(--orange);font-family:var(--font-hud);font-size:0.5rem;letter-spacing:0.12em;padding:9px;cursor:pointer;transition:all 0.2s;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:8px;" onmouseover="this.style.background='rgba(255,140,0,0.1)';this.style.borderColor='var(--orange)'" onmouseout="this.style.background='transparent';this.style.borderColor='rgba(255,140,0,0.4)'">
-      <span style="font-size:0.8rem;">◈</span> MARK PROJECT
+      <span style="font-size:0.8rem;">â—ˆ</span> MARK PROJECT
     </button>
     </div>
   </div>
   <div class="pblock">
     <div class="plabel">Projects</div>
     <button onclick="window.open('https://docs.google.com/document/d/1xa34Ix7-pBrfw65LP2DbQzceZxNcPQxXocFyMNvSKuw/edit','_blank')" style="width:100%;background:transparent;border:1px solid rgba(255,140,0,0.4);color:var(--orange);font-family:var(--font-hud);font-size:0.5rem;letter-spacing:0.12em;padding:9px;cursor:pointer;transition:all 0.2s;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:8px;" onmouseover="this.style.background='rgba(255,140,0,0.1)';this.style.borderColor='var(--orange)'" onmouseout="this.style.background='transparent';this.style.borderColor='rgba(255,140,0,0.4)'">
-      <span style="font-size:0.8rem;">◈</span> MARK PROJECT
+      <span style="font-size:0.8rem;">â—ˆ</span> MARK PROJECT
     </button>
     </div>
   </div>
@@ -202,6 +202,22 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 </div>
 <div class="center">
   <div class="arc-wrap">
+    <!-- Globe + News left of arc -->
+    <div style="position:absolute;left:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:8px;width:120px;align-items:center;">
+      <div style="font-family:var(--font-hud);font-size:0.46rem;letter-spacing:0.2em;color:var(--dim);display:flex;align-items:center;gap:6px;align-self:flex-start;"><span style="display:block;width:16px;height:1px;background:var(--cyan);"></span>LIVE FEED</div>
+      <canvas id="globe-canvas" width="100" height="100" style="border-radius:50%;border:1px solid rgba(0,200,240,0.2);box-shadow:0 0 12px rgba(0,200,240,0.15);"></canvas>
+      <div id="news-ticker" style="display:flex;flex-direction:column;gap:3px;width:100%;"></div>
+    </div>
+    <!-- Weather right of arc -->
+    <div style="position:absolute;right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:6px;width:120px;">
+      <div style="font-family:var(--font-hud);font-size:0.46rem;letter-spacing:0.2em;color:var(--dim);display:flex;align-items:center;gap:6px;"><span style="display:block;width:16px;height:1px;background:var(--cyan);"></span>WEATHER</div>
+      <div id="wx-temp" style="font-family:var(--font-hud);font-size:1.4rem;color:var(--cyan);text-shadow:0 0 10px rgba(0,200,240,0.4);">--°</div>
+      <div id="wx-cond" style="font-size:0.65rem;color:var(--dim);">--</div>
+      <div id="wx-feel" style="font-size:0.58rem;color:var(--muted);">Feels like --°</div>
+      <div id="wx-hum" style="font-size:0.58rem;color:var(--muted);">Humidity --%</div>
+      <div id="wx-wind" style="font-size:0.58rem;color:var(--muted);">Wind -- mph</div>
+      <div style="margin-top:4px;display:flex;flex-direction:column;gap:2px;" id="wx-forecast"></div>
+    </div>
     <div class="arc-canvas">
       <svg class="arc-svg" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -292,10 +308,10 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
     <div class="pblock">
       <div class="plabel">Integrations</div>
       <div class="irow"><span class="iname">ANTHROPIC</span><span style="color:var(--green);font-size:0.6rem;">ONLINE</span></div>
-      <div class="irow"><span class="iname">GOOGLE</span><span id="gs" style="color:var(--dim);font-size:0.6rem;">—</span></div>
-      <div class="irow"><span class="iname">CANVAS</span><span id="cs" style="color:var(--dim);font-size:0.6rem;">—</span></div>
-      <div class="irow"><span class="iname">WEATHER</span><span id="ws2" style="color:var(--dim);font-size:0.6rem;">—</span></div>
-      <div class="irow"><span class="iname">WEBSOCKET</span><span id="wss" style="color:var(--dim);font-size:0.6rem;">—</span></div>
+      <div class="irow"><span class="iname">GOOGLE</span><span id="gs" style="color:var(--dim);font-size:0.6rem;">â€”</span></div>
+      <div class="irow"><span class="iname">CANVAS</span><span id="cs" style="color:var(--dim);font-size:0.6rem;">â€”</span></div>
+      <div class="irow"><span class="iname">WEATHER</span><span id="ws2" style="color:var(--dim);font-size:0.6rem;">â€”</span></div>
+      <div class="irow"><span class="iname">WEBSOCKET</span><span id="wss" style="color:var(--dim);font-size:0.6rem;">â€”</span></div>
     </div>
     <div class="pblock">
       <div class="plabel">Active Memory</div>
@@ -364,7 +380,7 @@ function connectWS(){
 connectWS();
 
 function handle(msg){
-  if(msg.type==='thinking'){const t=document.getElementById('tmsg');if(t)t.querySelector('.ttext').textContent=msg.text.slice(0,55)+'…';}
+  if(msg.type==='thinking'){const t=document.getElementById('tmsg');if(t)t.querySelector('.ttext').textContent=msg.text.slice(0,55)+'â€¦';}
   else if(msg.type==='tools'){
     iterCount++;toolCount+=msg.tools.length;
     document.getElementById('s-iter').textContent=iterCount;
@@ -495,7 +511,93 @@ if('webkitSpeechRecognition' in window||'SpeechRecognition' in window){
 function startL(){listening=true;vbtn.classList.add('listening');vlbl.textContent='LISTENING...';wvf.classList.add('on');speechSynthesis.cancel();recognition.start();}
 function stopL(){listening=false;vbtn.classList.remove('listening');vlbl.textContent='ACTIVATE MIC';wvf.classList.remove('on');try{recognition.stop();}catch{}}
 
+// ── GLOBE ────────────────────────────────────────────────────────────────────
+(function(){
+  const canvas=document.getElementById('globe-canvas');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const W=100,H=100,R=46;
+  let angle=0;
+  const lats=[-60,-40,-20,0,20,40,60];
+  const lons=Array.from({length:12},(_,i)=>i*30);
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='rgba(0,12,20,0.8)';
+    ctx.beginPath();ctx.arc(W/2,H/2,R,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='rgba(0,200,240,0.08)';ctx.lineWidth=0.5;
+    ctx.beginPath();ctx.arc(W/2,H/2,R,0,Math.PI*2);ctx.stroke();
+    // Latitude lines
+    lats.forEach(lat=>{
+      const y=H/2+R*Math.sin(lat*Math.PI/180);
+      const rr=R*Math.cos(lat*Math.PI/180);
+      if(rr<1)return;
+      ctx.strokeStyle='rgba(0,200,240,0.15)';ctx.lineWidth=0.5;
+      ctx.beginPath();ctx.ellipse(W/2,y,rr,rr*0.15,0,0,Math.PI*2);ctx.stroke();
+    });
+    // Longitude lines
+    lons.forEach(lon=>{
+      const a=(lon+angle)*Math.PI/180;
+      const x1=W/2+R*Math.sin(a);
+      const x2=W/2+R*Math.sin(a+Math.PI);
+      ctx.strokeStyle=Math.abs(((lon+angle)%360+360)%360-180)<90?'rgba(0,200,240,0.2)':'rgba(0,200,240,0.06)';
+      ctx.lineWidth=0.5;
+      ctx.beginPath();ctx.ellipse(W/2,H/2,Math.abs(R*Math.cos(a)),R,0,0,Math.PI*2);ctx.stroke();
+    });
+    // Glow dot
+    ctx.fillStyle='rgba(0,200,240,0.8)';
+    ctx.shadowColor='rgba(0,200,240,0.6)';ctx.shadowBlur=6;
+    ctx.beginPath();ctx.arc(W/2+R*Math.sin(angle*Math.PI/180)*0.7,H/2-8,2,0,Math.PI*2);ctx.fill();
+    ctx.shadowBlur=0;
+    angle+=0.3;
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ── WEATHER ───────────────────────────────────────────────────────────────────
+async function fetchWeather(){
+  try{
+    const res=await fetch('/api/weather');
+    if(!res.ok)return;
+    const d=await res.json();
+    document.getElementById('wx-temp').textContent=Math.round(d.current.temp_f)+'°F';
+    document.getElementById('wx-cond').textContent=d.current.condition.text;
+    document.getElementById('wx-feel').textContent='Feels like '+Math.round(d.current.feelslike_f)+'°F';
+    document.getElementById('wx-hum').textContent='Humidity '+d.current.humidity+'%';
+    document.getElementById('wx-wind').textContent='Wind '+d.current.wind_mph+' mph';
+    const fc=document.getElementById('wx-forecast');
+    fc.innerHTML='';
+    d.forecast.forecastday.slice(0,3).forEach(day=>{
+      const div=document.createElement('div');
+      div.style.cssText='font-size:0.52rem;color:var(--muted);display:flex;justify-content:space-between;';
+      const date=new Date(day.date).toLocaleDateString('en-US',{weekday:'short'});
+      div.innerHTML=`<span>${date}</span><span style="color:var(--cyan)">${Math.round(day.day.maxtemp_f)}°/${Math.round(day.day.mintemp_f)}°</span>`;
+      fc.appendChild(div);
+    });
+  }catch(e){console.log('Weather widget error',e);}
+}
+fetchWeather();setInterval(fetchWeather,1800000);
+
+// ── NEWS TICKER ───────────────────────────────────────────────────────────────
+async function fetchNews(){
+  try{
+    const res=await fetch('/api/news');
+    if(!res.ok)return;
+    const items=await res.json();
+    const ticker=document.getElementById('news-ticker');
+    if(!ticker)return;
+    ticker.innerHTML='';
+    items.slice(0,5).forEach(item=>{
+      const div=document.createElement('div');
+      div.style.cssText='font-size:0.52rem;color:var(--muted);line-height:1.3;padding:2px 0;border-bottom:1px solid var(--border);';
+      div.textContent=item.title.slice(0,55)+(item.title.length>55?'…':'');
+      ticker.appendChild(div);
+    });
+  }catch(e){console.log('News widget error',e);}
+}
+fetchNews();setInterval(fetchNews,300000);
 if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
 </script>
 </body>
 </html>
+
