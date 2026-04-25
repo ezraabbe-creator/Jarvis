@@ -8,6 +8,8 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { google } from 'googleapis';
+import twilio from 'twilio';
+import cron from 'node-cron';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -34,6 +36,182 @@ function saveHistory(messages) {
   writeFileSync(HISTORY_FILE, JSON.stringify(clean, null, 2));
 }
 let persistentMemory = loadMemory();
+
+// ─── TWILIO ──────────────────────────────────────────────────────────────────
+const twilioClient = process.env.TWILIO_SID && process.env.TWILIO_TOKEN
+  ? twilio(process.env.TWILIO_SID, process.env.TWILIO_TOKEN)
+  : null;
+
+async function sendSMS(message) {
+  if (!twilioClient) return console.log('Twilio not configured');
+  try {
+    await twilioClient.messages.create({
+      body: message,
+      from: process.env.TWILIO_FROM,
+      to: process.env.TWILIO_TO
+    });
+    console.log('SMS sent:', message.slice(0, 50));
+  } catch (err) {
+    console.error('SMS error:', err.message);
+  }
+}
+
+// ─── PROACTIVE ALERT CRON ────────────────────────────────────────────────────
+async function runProactiveCheck() {
+  console.log('Running proactive check...');
+  const alerts = [];
+
+  // Check Canvas for missing/upcoming assignments
+  if (process.env.CANVAS_API_TOKEN && process.env.CANVAS_DOMAIN) {
+    try {
+      const h = { 'Authorization': `Bearer ${process.env.CANVAS_API_TOKEN}` };
+      const domain = process.env.CANVAS_DOMAIN;
+      const coursesRes = await fetch(`https://${domain}/api/v1/courses?enrollment_state=active&per_page=10`, { headers: h });
+      const courses = await coursesRes.json();
+      if (Array.isArray(courses)) {
+        for (const course of courses.slice(0, 5)) {
+          const aRes = await fetch(`https://${domain}/api/v1/courses/${course.id}/assignments?order_by=due_at&per_page=5&bucket=upcoming`, { headers: h });
+          const assignments = await aRes.json();
+          if (Array.isArray(assignments)) {
+            for (const a of assignments) {
+              if (!a.due_at) continue;
+              const due = new Date(a.due_at);
+              const hoursUntil = (due - new Date()) / (1000 * 60 * 60);
+              if (hoursUntil > 0 && hoursUntil <= 24) {
+                alerts.push(`📚 DUE IN ${Math.round(hoursUntil)}H: ${a.name} (${course.name})`);
+              }
+            }
+          }
+        }
+      }
+    } catch (err) { console.error('Canvas check error:', err.message); }
+  }
+
+  // Check Google Calendar
+  if (isGoogleAuthed()) {
+    try {
+      const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+      const now = new Date();
+      const in2h = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+      const res = await calendar.events.list({
+        calendarId: 'primary',
+        timeMin: now.toISOString(),
+        timeMax: in2h.toISOString(),
+        singleEvents: true,
+        orderBy: 'startTime',
+        maxResults: 5
+      });
+      const events = res.data.items || [];
+      for (const e of events) {
+        const start = e.start.dateTime ? new Date(e.start.dateTime) : null;
+        if (!start) continue;
+        const minsUntil = Math.round((start - now) / (1000 * 60));
+        if (minsUntil > 0 && minsUntil <= 60) {
+          alerts.push(`📅 IN ${minsUntil} MIN: ${e.summary}`);
+        }
+      }
+    } catch (err) { console.error('Calendar check error:', err.message); }
+  }
+
+  if (alerts.length > 0) {
+    const msg = `🤖 JARVIS ALERT\n\n${alerts.join('\n')}\n\n— J.A.R.V.I.S.`;
+    await sendSMS(msg);
+  } else {
+    console.log('No alerts to send');
+  }
+}
+
+// Run every 30 minutes
+cron.schedule('*/30 * * * *', runProactiveCheck);
+console.log('⏰ Proactive alerts scheduled every 30 minutes');
+
+// ─── TWILIO ──────────────────────────────────────────────────────────────────
+const twilioClient = process.env.TWILIO_SID && process.env.TWILIO_TOKEN
+  ? twilio(process.env.TWILIO_SID, process.env.TWILIO_TOKEN)
+  : null;
+
+async function sendSMS(message) {
+  if (!twilioClient) return console.log('Twilio not configured');
+  try {
+    await twilioClient.messages.create({
+      body: message,
+      from: process.env.TWILIO_FROM,
+      to: process.env.TWILIO_TO
+    });
+    console.log('SMS sent:', message.slice(0, 50));
+  } catch (err) {
+    console.error('SMS error:', err.message);
+  }
+}
+
+// ─── PROACTIVE ALERT CRON ────────────────────────────────────────────────────
+async function runProactiveCheck() {
+  console.log('Running proactive check...');
+  const alerts = [];
+
+  // Check Canvas for missing/upcoming assignments
+  if (process.env.CANVAS_API_TOKEN && process.env.CANVAS_DOMAIN) {
+    try {
+      const h = { 'Authorization': `Bearer ${process.env.CANVAS_API_TOKEN}` };
+      const domain = process.env.CANVAS_DOMAIN;
+      const coursesRes = await fetch(`https://${domain}/api/v1/courses?enrollment_state=active&per_page=10`, { headers: h });
+      const courses = await coursesRes.json();
+      if (Array.isArray(courses)) {
+        for (const course of courses.slice(0, 5)) {
+          const aRes = await fetch(`https://${domain}/api/v1/courses/${course.id}/assignments?order_by=due_at&per_page=5&bucket=upcoming`, { headers: h });
+          const assignments = await aRes.json();
+          if (Array.isArray(assignments)) {
+            for (const a of assignments) {
+              if (!a.due_at) continue;
+              const due = new Date(a.due_at);
+              const hoursUntil = (due - new Date()) / (1000 * 60 * 60);
+              if (hoursUntil > 0 && hoursUntil <= 24) {
+                alerts.push(`📚 DUE IN ${Math.round(hoursUntil)}H: ${a.name} (${course.name})`);
+              }
+            }
+          }
+        }
+      }
+    } catch (err) { console.error('Canvas check error:', err.message); }
+  }
+
+  // Check Google Calendar
+  if (isGoogleAuthed()) {
+    try {
+      const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+      const now = new Date();
+      const in2h = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+      const res = await calendar.events.list({
+        calendarId: 'primary',
+        timeMin: now.toISOString(),
+        timeMax: in2h.toISOString(),
+        singleEvents: true,
+        orderBy: 'startTime',
+        maxResults: 5
+      });
+      const events = res.data.items || [];
+      for (const e of events) {
+        const start = e.start.dateTime ? new Date(e.start.dateTime) : null;
+        if (!start) continue;
+        const minsUntil = Math.round((start - now) / (1000 * 60));
+        if (minsUntil > 0 && minsUntil <= 60) {
+          alerts.push(`📅 IN ${minsUntil} MIN: ${e.summary}`);
+        }
+      }
+    } catch (err) { console.error('Calendar check error:', err.message); }
+  }
+
+  if (alerts.length > 0) {
+    const msg = `🤖 JARVIS ALERT\n\n${alerts.join('\n')}\n\n— J.A.R.V.I.S.`;
+    await sendSMS(msg);
+  } else {
+    console.log('No alerts to send');
+  }
+}
+
+// Run every 30 minutes
+cron.schedule('*/30 * * * *', runProactiveCheck);
+console.log('⏰ Proactive alerts scheduled every 30 minutes');
 
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
