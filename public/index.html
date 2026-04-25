@@ -511,44 +511,113 @@ if('webkitSpeechRecognition' in window||'SpeechRecognition' in window){
 function startL(){listening=true;vbtn.classList.add('listening');vlbl.textContent='LISTENING...';wvf.classList.add('on');speechSynthesis.cancel();recognition.start();}
 function stopL(){listening=false;vbtn.classList.remove('listening');vlbl.textContent='ACTIVATE MIC';wvf.classList.remove('on');try{recognition.stop();}catch{}}
 
-// ── GLOBE ────────────────────────────────────────────────────────────────────
+// ── GLOBE ─────────────────────────────────────────────────────────────────
 (function(){
-  const canvas=document.getElementById('globe-canvas');
-  if(!canvas)return;
-  const ctx=canvas.getContext('2d');
-  const W=100,H=100,R=46;
-  let angle=0;
-  const lats=[-60,-40,-20,0,20,40,60];
-  const lons=Array.from({length:12},(_,i)=>i*30);
-  function draw(){
-    ctx.clearRect(0,0,W,H);
-    ctx.fillStyle='rgba(0,12,20,0.8)';
-    ctx.beginPath();ctx.arc(W/2,H/2,R,0,Math.PI*2);ctx.fill();
-    ctx.strokeStyle='rgba(0,200,240,0.08)';ctx.lineWidth=0.5;
-    ctx.beginPath();ctx.arc(W/2,H/2,R,0,Math.PI*2);ctx.stroke();
-    // Latitude lines
-    lats.forEach(lat=>{
-      const y=H/2+R*Math.sin(lat*Math.PI/180);
-      const rr=R*Math.cos(lat*Math.PI/180);
-      if(rr<1)return;
-      ctx.strokeStyle='rgba(0,200,240,0.15)';ctx.lineWidth=0.5;
-      ctx.beginPath();ctx.ellipse(W/2,y,rr,rr*0.15,0,0,Math.PI*2);ctx.stroke();
+  const canvas = document.getElementById('globe-canvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cx = W/2, cy = H/2, R = W/2 - 4;
+  let rot = 0;
+
+  // Simplified continent dots (lat/lon pairs)
+  const points = [
+    // North America
+    [40,-100],[45,-95],[50,-90],[35,-105],[30,-95],[25,-100],[50,-110],[55,-115],[45,-75],[40,-80],
+    // Europe
+    [50,10],[55,15],[48,5],[52,20],[45,15],[60,20],[55,25],[48,2],[51,0],[53,10],
+    // Africa
+    [0,20],[10,20],[-10,25],[5,35],[15,30],[20,15],[-20,30],[0,35],[-30,25],[10,10],
+    // Asia
+    [40,80],[50,90],[35,100],[25,110],[55,85],[60,100],[30,70],[45,70],[20,80],[35,120],
+    // South America
+    [-15,-55],[-5,-50],[0,-60],[-20,-60],[-30,-65],[-10,-75],[5,-55],[-40,-65],[-25,-50],[-15,-70],
+    // Australia
+    [-25,135],[-30,125],[-20,140],[-35,145],[-25,120],[-30,140],
+  ];
+
+  function project(lat, lon, rotation) {
+    const phi = lat * Math.PI / 180;
+    const lam = (lon + rotation) * Math.PI / 180;
+    const x = R * Math.cos(phi) * Math.sin(lam);
+    const y = R * Math.sin(phi);
+    const z = R * Math.cos(phi) * Math.cos(lam);
+    return { x: cx + x, y: cy - y, z };
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    // Background sphere
+    const grad = ctx.createRadialGradient(cx-R*0.3, cy-R*0.3, R*0.1, cx, cy, R);
+    grad.addColorStop(0, 'rgba(0,40,60,0.9)');
+    grad.addColorStop(1, 'rgba(0,10,20,0.95)');
+    ctx.fillStyle = grad;
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI*2); ctx.fill();
+
+    // Outer glow ring
+    ctx.strokeStyle = 'rgba(0,200,240,0.3)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI*2); ctx.stroke();
+
+    // Grid lines - latitude
+    for(let lat = -60; lat <= 60; lat += 30) {
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(0,200,240,0.08)';
+      ctx.lineWidth = 0.5;
+      let first = true;
+      for(let lon = -180; lon <= 180; lon += 5) {
+        const p = project(lat, lon, rot);
+        if(p.z > 0) {
+          if(first) { ctx.moveTo(p.x, p.y); first = false; }
+          else ctx.lineTo(p.x, p.y);
+        } else first = true;
+      }
+      ctx.stroke();
+    }
+
+    // Grid lines - longitude
+    for(let lon = 0; lon < 360; lon += 30) {
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(0,200,240,0.08)';
+      ctx.lineWidth = 0.5;
+      let first = true;
+      for(let lat = -90; lat <= 90; lat += 5) {
+        const p = project(lat, lon, rot);
+        if(p.z > 0) {
+          if(first) { ctx.moveTo(p.x, p.y); first = false; }
+          else ctx.lineTo(p.x, p.y);
+        } else first = true;
+      }
+      ctx.stroke();
+    }
+
+    // Continent dots
+    points.forEach(([lat, lon]) => {
+      const p = project(lat, lon, rot);
+      if(p.z > 0) {
+        const brightness = p.z / R;
+        ctx.fillStyle = `rgba(0,200,240,${0.4 + brightness * 0.5})`;
+        ctx.shadowColor = 'rgba(0,200,240,0.6)';
+        ctx.shadowBlur = 3;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 1.5, 0, Math.PI*2);
+        ctx.fill();
+      }
     });
-    // Longitude lines
-    lons.forEach(lon=>{
-      const a=(lon+angle)*Math.PI/180;
-      const x1=W/2+R*Math.sin(a);
-      const x2=W/2+R*Math.sin(a+Math.PI);
-      ctx.strokeStyle=Math.abs(((lon+angle)%360+360)%360-180)<90?'rgba(0,200,240,0.2)':'rgba(0,200,240,0.06)';
-      ctx.lineWidth=0.5;
-      ctx.beginPath();ctx.ellipse(W/2,H/2,Math.abs(R*Math.cos(a)),R,0,0,Math.PI*2);ctx.stroke();
-    });
-    // Glow dot
-    ctx.fillStyle='rgba(0,200,240,0.8)';
-    ctx.shadowColor='rgba(0,200,240,0.6)';ctx.shadowBlur=6;
-    ctx.beginPath();ctx.arc(W/2+R*Math.sin(angle*Math.PI/180)*0.7,H/2-8,2,0,Math.PI*2);ctx.fill();
-    ctx.shadowBlur=0;
-    angle+=0.3;
+    ctx.shadowBlur = 0;
+
+    // Highlight dot (like a location ping)
+    const ping = project(34, -119, rot); // Camarillo CA
+    if(ping.z > 0) {
+      ctx.fillStyle = 'rgba(255,140,0,0.9)';
+      ctx.shadowColor = 'rgba(255,140,0,0.8)';
+      ctx.shadowBlur = 8;
+      ctx.beginPath(); ctx.arc(ping.x, ping.y, 2.5, 0, Math.PI*2); ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+
+    rot += 0.4;
     requestAnimationFrame(draw);
   }
   draw();
