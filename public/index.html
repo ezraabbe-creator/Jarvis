@@ -644,7 +644,7 @@ async function fetchWeather(){
     });
   }catch(e){console.log('Weather widget error',e);}
 }
-window.addEventListener('load',()=>{fetchWeather();setInterval(fetchWeather,1800000);});
+setTimeout(()=>{fetchWeather();setInterval(fetchWeather,1800000);},2000);
 
 //  NEWS TICKER 
 async function fetchNews(){
@@ -668,6 +668,7 @@ if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch
 </script>
 </body>
 </html>
+
 
 
 
