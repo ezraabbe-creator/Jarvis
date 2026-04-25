@@ -440,7 +440,7 @@ function qs(text){inp.value=text;send(text);}
 sbtn.addEventListener('click',()=>send());
 inp.addEventListener('keydown',e=>{if(e.key==='Enter')send();});
 
-const ELEVEN_KEY='9c0c6f69ff3d859eb629a5cecc1be7ce65a6041ca525ce942d90f3e4d105aa52';
+const ELEVEN_KEY='sk_442756c58b7e22580d38327d82beb3da01dbec556f24b5f3';
 let voices=[];
 speechSynthesis.onvoiceschanged=()=>{voices=speechSynthesis.getVoices();};
 async function speak(text){
@@ -477,6 +477,7 @@ if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch
 </script>
 </body>
 </html>
+
 
 
 
