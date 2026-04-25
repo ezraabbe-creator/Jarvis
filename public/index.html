@@ -509,7 +509,7 @@ if('webkitSpeechRecognition' in window||'SpeechRecognition' in window){
 }else{vbtn.disabled=true;vlbl.textContent='NOT SUPPORTED';}
 function startL(){listening=true;vbtn.classList.add('listening');vlbl.textContent='LISTENING...';wvf.classList.add('on');speechSynthesis.cancel();recognition.start();}
 function stopL(){listening=false;vbtn.classList.remove('listening');vlbl.textContent='ACTIVATE MIC';wvf.classList.remove('on');try{recognition.stop();}catch(e){}}
-
+ 
 //  GLOBE 
 (function(){
   const canvas = document.getElementById('globe-canvas');
