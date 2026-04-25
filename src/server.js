@@ -95,7 +95,7 @@ async function runProactiveCheck() {
       const in2h = new Date(now.getTime() + 2 * 60 * 60 * 1000);
       const res = await calendar.events.list({
         calendarId: 'primary',
-        timeMin: now.toISOString(),
+        timeMin: new Date(now.getTime() - pastDays * 24 * 60 * 60 * 1000).toISOString(),
         timeMax: in2h.toISOString(),
         singleEvents: true,
         orderBy: 'startTime',
@@ -185,7 +185,7 @@ const TOOLS = [
   { name: 'forget', description: 'Delete a memory.', input_schema: { type: 'object', properties: { key: { type: 'string' } }, required: ['key'] } },
   { name: 'check_google_auth', description: 'Check if Google is connected.', input_schema: { type: 'object', properties: {}, required: [] } },
   { name: 'send_sms', description: 'Send a text message to the user. Use this when asked to text, send a message, or alert the user.', input_schema: { type: 'object', properties: { message: { type: 'string', description: 'The message to send' } }, required: ['message'] } },
-  { name: 'get_calendar', description: 'Get upcoming calendar events. Can filter by date range.', input_schema: { type: 'object', properties: { days: { type: 'number', description: 'How many days ahead to look, default 7' } }, required: [] } },
+  { name: 'get_calendar', description: 'Get upcoming calendar events. Use days=30 for a month, days=90 for a semester, days=365 for a year. Can also look into the past with past_days.', input_schema: { type: 'object', properties: { days: { type: 'number', description: 'How many days ahead to look, default 7' } }, required: [] } },
   {
     name: 'get_canvas_assignments',
     description: 'Get assignments from Canvas. course_id can be "all". filter can be "missing" for unsubmitted, "future" for upcoming, or omit for all.',
@@ -277,15 +277,16 @@ async function executeTool(name, input) {
         if (!isGoogleAuthed()) return 'Google not connected.';
         const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
         const days = input.days || 7;
+        const pastDays = input.past_days || 0;
         const now = new Date();
         const future = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
         const res = await calendar.events.list({
           calendarId: 'primary',
-          timeMin: now.toISOString(),
+          timeMin: new Date(now.getTime() - pastDays * 24 * 60 * 60 * 1000).toISOString(),
           timeMax: future.toISOString(),
           singleEvents: true,
           orderBy: 'startTime',
-          maxResults: 20
+          maxResults: 50
         });
         const events = res.data.items || [];
         if (!events.length) return `No events found in the next ${days} days.`;
@@ -746,5 +747,9 @@ server.listen(PORT, () => {
   console.log(`?? Google: ${isGoogleAuthed() ? 'Connected' : 'Not connected � visit /auth/google'}`);
   console.log(`?? Canvas: ${process.env.CANVAS_API_TOKEN ? 'Configured' : 'Not configured'}\n`);
 });
+
+
+
+
 
 
