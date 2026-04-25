@@ -1,4 +1,4 @@
-import 'dotenv/config';
+ï»¿import 'dotenv/config';
 import express from 'express';
 import { WebSocketServer } from 'ws';
 import { createServer } from 'http';
@@ -114,7 +114,7 @@ async function runProactiveCheck() {
   }
 
   if (alerts.length > 0) {
-    const msg = `?? JARVIS ALERT\n\n${alerts.join('\n')}\n\n— J.A.R.V.I.S.`;
+    const msg = `?? JARVIS ALERT\n\n${alerts.join('\n')}\n\nï¿½ J.A.R.V.I.S.`;
     await sendSMS(msg);
   } else {
     console.log('No alerts to send');
@@ -250,19 +250,19 @@ async function executeTool(name, input) {
         }
         const res = await fetch(`https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(input.query)}&count=5`, { headers: { 'Accept': 'application/json', 'X-Subscription-Token': process.env.BRAVE_API_KEY } });
         const data = await res.json();
-        return (data.web?.results || []).slice(0, 5).map(r => `• ${r.title}\n  ${r.description}`).join('\n\n');
+        return (data.web?.results || []).slice(0, 5).map(r => `ï¿½ ${r.title}\n  ${r.description}`).join('\n\n');
       }
       case 'get_weather': {
         if (!process.env.WEATHER_API_KEY) return 'Weather API key not set.';
         const res = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=${process.env.WEATHER_API_KEY}&q=${encodeURIComponent(input.location)}&days=3&aqi=no`);
         const d = await res.json();
         if (d.error) return `Weather error: ${d.error.message}`;
-        return `${d.location.name}: ${d.current.temp_f}°F, ${d.current.condition.text}. 3-day: ${d.forecast.forecastday.map(x => `${x.date}: ${x.day.maxtemp_f}/${x.day.mintemp_f}°F`).join(' | ')}`;
+        return `${d.location.name}: ${d.current.temp_f}ï¿½F, ${d.current.condition.text}. 3-day: ${d.forecast.forecastday.map(x => `${x.date}: ${x.day.maxtemp_f}/${x.day.mintemp_f}ï¿½F`).join(' | ')}`;
       }
       case 'get_news': {
         const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(`https://news.google.com/rss/search?q=${encodeURIComponent(input.topic)}&hl=en-US&gl=US&ceid=US:en`)}`);
         const data = await res.json();
-        return data.items?.length ? data.items.slice(0, 6).map(i => `• ${i.title}`).join('\n') : `No news for "${input.topic}".`;
+        return data.items?.length ? data.items.slice(0, 6).map(i => `ï¿½ ${i.title}`).join('\n') : `No news for "${input.topic}".`;
       }
       case 'calculate': {
         const result = Function(`"use strict"; return (${input.expression.replace(/[^0-9+\-*/().,% ]/g, '')})`)();
@@ -270,7 +270,7 @@ async function executeTool(name, input) {
       }
       case 'remember': { persistentMemory[input.key] = { value: input.value, saved: new Date().toISOString() }; saveMemory(persistentMemory); return `Saved: "${input.key}" = "${input.value}"`; }
       case 'recall': { const item = persistentMemory[input.key]; return item ? `"${input.key}": ${item.value}` : `No memory for "${input.key}".`; }
-      case 'list_memories': { const keys = Object.keys(persistentMemory); return keys.length ? 'Memories:\n' + keys.map(k => `• ${k}: ${persistentMemory[k].value}`).join('\n') : 'No memories.'; }
+      case 'list_memories': { const keys = Object.keys(persistentMemory); return keys.length ? 'Memories:\n' + keys.map(k => `ï¿½ ${k}: ${persistentMemory[k].value}`).join('\n') : 'No memories.'; }
       case 'forget': { if (persistentMemory[input.key]) { delete persistentMemory[input.key]; saveMemory(persistentMemory); return `Forgot "${input.key}"`; } return `No memory for "${input.key}"`; }
       case 'get_calendar': {
         if (!isGoogleAuthed()) return 'Google not connected.';
@@ -290,7 +290,7 @@ async function executeTool(name, input) {
         if (!events.length) return `No events found in the next ${days} days.`;
         return `Upcoming events (next ${days} days):\n` + events.map(e => {
           const start = e.start.dateTime ? new Date(e.start.dateTime).toLocaleString() : e.start.date;
-          return `• ${e.summary} — ${start}${e.location ? ' @ ' + e.location : ''}`;
+          return `ï¿½ ${e.summary} ï¿½ ${start}${e.location ? ' @ ' + e.location : ''}`;
         }).join('\n');
       }
       case 'check_google_auth': {
@@ -311,13 +311,13 @@ async function executeTool(name, input) {
             const assignments = await (await fetch(`https://${domain}/api/v1/courses/${c.id}/assignments?order_by=due_at&per_page=10${bucket}`, { headers: h })).json();
             if (Array.isArray(assignments) && assignments.length) {
               all.push(`?? ${c.name}:`);
-              assignments.slice(0, 6).forEach(a => all.push(`  • ${a.name} — Due: ${a.due_at ? new Date(a.due_at).toLocaleDateString() : 'N/A'} (${a.points_possible} pts)\n    ${(a.description || '').replace(/<[^>]+>/g, '').slice(0, 150)}`));
+              assignments.slice(0, 6).forEach(a => all.push(`  ï¿½ ${a.name} ï¿½ Due: ${a.due_at ? new Date(a.due_at).toLocaleDateString() : 'N/A'} (${a.points_possible} pts)\n    ${(a.description || '').replace(/<[^>]+>/g, '').slice(0, 150)}`));
             }
           }
           return all.length ? all.join('\n') : 'No assignments found.';
         }
         const assignments = await (await fetch(`https://${domain}/api/v1/courses/${input.course_id}/assignments?order_by=due_at&per_page=20${bucket}`, { headers: h })).json();
-        return Array.isArray(assignments) ? assignments.slice(0, 10).map(a => `• ${a.name} — Due: ${a.due_at ? new Date(a.due_at).toLocaleDateString() : 'N/A'}\n  ${(a.description || '').replace(/<[^>]+>/g, '').slice(0, 150)}`).join('\n\n') : `Error: ${JSON.stringify(assignments)}`;
+        return Array.isArray(assignments) ? assignments.slice(0, 10).map(a => `ï¿½ ${a.name} ï¿½ Due: ${a.due_at ? new Date(a.due_at).toLocaleDateString() : 'N/A'}\n  ${(a.description || '').replace(/<[^>]+>/g, '').slice(0, 150)}`).join('\n\n') : `Error: ${JSON.stringify(assignments)}`;
       }
       case 'get_classroom_assignments': {
         if (!isGoogleAuthed()) return 'Google not connected.';
@@ -329,20 +329,20 @@ async function executeTool(name, input) {
             const work = (await classroom.courses.courseWork.list({ courseId: c.id })).data.courseWork || [];
             if (work.length) {
               all.push(`?? ${c.name}:`);
-              work.slice(0, 5).forEach(w => all.push(`  • ${w.title} — Due: ${w.dueDate ? `${w.dueDate.month}/${w.dueDate.day}/${w.dueDate.year}` : 'N/A'}\n    ${(w.description || '').slice(0, 150)}`));
+              work.slice(0, 5).forEach(w => all.push(`  ï¿½ ${w.title} ï¿½ Due: ${w.dueDate ? `${w.dueDate.month}/${w.dueDate.day}/${w.dueDate.year}` : 'N/A'}\n    ${(w.description || '').slice(0, 150)}`));
             }
           }
           return all.length ? all.join('\n') : 'No Classroom assignments found.';
         }
         const work = (await classroom.courses.courseWork.list({ courseId: input.course_id })).data.courseWork || [];
-        return work.slice(0, 10).map(w => `• ${w.title} — Due: ${w.dueDate ? `${w.dueDate.month}/${w.dueDate.day}` : 'N/A'}\n  ${(w.description || '').slice(0, 150)}`).join('\n\n');
+        return work.slice(0, 10).map(w => `ï¿½ ${w.title} ï¿½ Due: ${w.dueDate ? `${w.dueDate.month}/${w.dueDate.day}` : 'N/A'}\n  ${(w.description || '').slice(0, 150)}`).join('\n\n');
       }
       case 'list_drive_files': {
         if (!isGoogleAuthed()) return 'Google not connected.';
         const drive = google.drive({ version: 'v3', auth: oauth2Client });
         const res = await drive.files.list({ q: `name contains '${input.query}' and trashed=false`, fields: 'files(id,name,mimeType,webViewLink)', pageSize: 10 });
         const files = res.data.files || [];
-        return files.length ? files.map(f => `• ${f.name}\n  ID: ${f.id}\n  Link: ${f.webViewLink}`).join('\n\n') : `No files found for "${input.query}"`;
+        return files.length ? files.map(f => `ï¿½ ${f.name}\n  ID: ${f.id}\n  Link: ${f.webViewLink}`).join('\n\n') : `No files found for "${input.query}"`;
       }
       case 'read_google_doc': {
         if (!isGoogleAuthed()) return 'Google not connected.';
@@ -660,7 +660,7 @@ async function runAgentLoop(conversationHistory, onUpdate) {
 
 wss.on('connection', (ws) => {
   const sessionHistory = loadHistory();
-  console.log(`Client connected — ${sessionHistory.length} messages, ${Object.keys(persistentMemory).length} memories`);
+  console.log(`Client connected ï¿½ ${sessionHistory.length} messages, ${Object.keys(persistentMemory).length} memories`);
   ws.on('message', async (raw) => {
     let data; try { data = JSON.parse(raw); } catch { return; }
     if (data.type === 'message') {
@@ -738,6 +738,7 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`\n?? J.A.R.V.I.S. online at http://localhost:${PORT}`);
   console.log(`?? ${Object.keys(persistentMemory).length} memories | ?? ${loadHistory().length} history messages`);
-  console.log(`?? Google: ${isGoogleAuthed() ? 'Connected' : 'Not connected — visit /auth/google'}`);
+  console.log(`?? Google: ${isGoogleAuthed() ? 'Connected' : 'Not connected ï¿½ visit /auth/google'}`);
   console.log(`?? Canvas: ${process.env.CANVAS_API_TOKEN ? 'Configured' : 'Not configured'}\n`);
 });
+
