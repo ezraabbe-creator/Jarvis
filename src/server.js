@@ -184,6 +184,7 @@ const TOOLS = [
   { name: 'list_memories', description: 'List all memories.', input_schema: { type: 'object', properties: {}, required: [] } },
   { name: 'forget', description: 'Delete a memory.', input_schema: { type: 'object', properties: { key: { type: 'string' } }, required: ['key'] } },
   { name: 'check_google_auth', description: 'Check if Google is connected.', input_schema: { type: 'object', properties: {}, required: [] } },
+  { name: 'send_sms', description: 'Send a text message to the user. Use this when asked to text, send a message, or alert the user.', input_schema: { type: 'object', properties: { message: { type: 'string', description: 'The message to send' } }, required: ['message'] } },
   { name: 'get_calendar', description: 'Get upcoming calendar events. Can filter by date range.', input_schema: { type: 'object', properties: { days: { type: 'number', description: 'How many days ahead to look, default 7' } }, required: [] } },
   {
     name: 'get_canvas_assignments',
@@ -292,6 +293,10 @@ async function executeTool(name, input) {
           const start = e.start.dateTime ? new Date(e.start.dateTime).toLocaleString() : e.start.date;
           return `� ${e.summary} � ${start}${e.location ? ' @ ' + e.location : ''}`;
         }).join('\n');
+      }
+      case 'send_sms': {
+        await sendSMS(input.message);
+        return 'SMS sent successfully.';
       }
       case 'check_google_auth': {
         if (isGoogleAuthed()) return 'Google account is connected.';
@@ -741,4 +746,5 @@ server.listen(PORT, () => {
   console.log(`?? Google: ${isGoogleAuthed() ? 'Connected' : 'Not connected � visit /auth/google'}`);
   console.log(`?? Canvas: ${process.env.CANVAS_API_TOKEN ? 'Configured' : 'Not configured'}\n`);
 });
+
 
