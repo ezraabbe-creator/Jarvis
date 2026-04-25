@@ -364,7 +364,7 @@ async function chkHealth(){
     gs.textContent=d.google?'ONLINE':'OFFLINE';gs.style.color=d.google?'var(--green)':'var(--red)';
     document.getElementById('cs').textContent='ONLINE';document.getElementById('cs').style.color='var(--green)';
     document.getElementById('ws2').textContent='ONLINE';document.getElementById('ws2').style.color='var(--green)';
-  }catch{}
+  }catch(e){}
 }
 chkHealth();setInterval(chkHealth,30000);
 
@@ -487,7 +487,7 @@ async function speak(text){
     const audio=new Audio(url);
     audio.play();
     audio.onended=()=>URL.revokeObjectURL(url);
-  }catch{
+  }catch(e){
     if(!('speechSynthesis' in window))return;
     speechSynthesis.cancel();
     const utt=new SpeechSynthesisUtterance(clean);
@@ -508,7 +508,7 @@ if('webkitSpeechRecognition' in window||'SpeechRecognition' in window){
   vbtn.addEventListener('click',()=>{if(listening)stopL();else startL();});
 }else{vbtn.disabled=true;vlbl.textContent='NOT SUPPORTED';}
 function startL(){listening=true;vbtn.classList.add('listening');vlbl.textContent='LISTENING...';wvf.classList.add('on');speechSynthesis.cancel();recognition.start();}
-function stopL(){listening=false;vbtn.classList.remove('listening');vlbl.textContent='ACTIVATE MIC';wvf.classList.remove('on');try{recognition.stop();}catch{}}
+function stopL(){listening=false;vbtn.classList.remove('listening');vlbl.textContent='ACTIVATE MIC';wvf.classList.remove('on');try{recognition.stop();}catch(e){}}
 
 //  GLOBE 
 (function(){
@@ -668,6 +668,7 @@ if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch
 </script>
 </body>
 </html>
+
 
 
 
