@@ -174,6 +174,20 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
       <button class="qbtn" onclick="window.location.href='/auth/google'">GOOGLE AUTH</button>
     </div>
   </div>
+  <div class="pblock">
+    <div class="plabel">Projects</div>
+    <button onclick="window.open('https://docs.google.com/document/d/1xa34Ix7-pBrfw65LP2DbQzceZxNcPQxXocFyMNvSKuw/edit','_blank')" style="width:100%;background:transparent;border:1px solid rgba(255,140,0,0.4);color:var(--orange);font-family:var(--font-hud);font-size:0.5rem;letter-spacing:0.12em;padding:9px;cursor:pointer;transition:all 0.2s;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:8px;" onmouseover="this.style.background='rgba(255,140,0,0.1)';this.style.borderColor='var(--orange)'" onmouseout="this.style.background='transparent';this.style.borderColor='rgba(255,140,0,0.4)'">
+      <span style="font-size:0.8rem;">◈</span> MARK PROJECT
+    </button>
+    </div>
+  </div>
+  <div class="pblock">
+    <div class="plabel">Projects</div>
+    <button onclick="window.open('https://docs.google.com/document/d/1xa34Ix7-pBrfw65LP2DbQzceZxNcPQxXocFyMNvSKuw/edit','_blank')" style="width:100%;background:transparent;border:1px solid rgba(255,140,0,0.4);color:var(--orange);font-family:var(--font-hud);font-size:0.5rem;letter-spacing:0.12em;padding:9px;cursor:pointer;transition:all 0.2s;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:8px;" onmouseover="this.style.background='rgba(255,140,0,0.1)';this.style.borderColor='var(--orange)'" onmouseout="this.style.background='transparent';this.style.borderColor='rgba(255,140,0,0.4)'">
+      <span style="font-size:0.8rem;">◈</span> MARK PROJECT
+    </button>
+    </div>
+  </div>
   <div class="pblock grow">
     <div class="plabel">Tool Activity</div>
     <div id="tlog"><span style="font-size:0.56rem;color:var(--muted);">IDLE</span></div>
@@ -440,17 +454,25 @@ function qs(text){inp.value=text;send(text);}
 sbtn.addEventListener('click',()=>send());
 inp.addEventListener('keydown',e=>{if(e.key==='Enter')send();});
 
-const ELEVEN_KEY='sk_442756c58b7e22580d38327d82beb3da01dbec556f24b5f3';
-let voices=[];
+const ELEVEN_KEY='your-elevenlabs-api-key-here';
+const ELEVEN_KEY='9c0c6f69ff3d859eb629a5cecc1be7ce65a6041ca525ce942d90f3e4d105aa52';
+let voices=[];;
 speechSynthesis.onvoiceschanged=()=>{voices=speechSynthesis.getVoices();};
 async function speak(text){
-  const clean=text.replace(/<[^>]+>/g,'').replace(/\*\*/g,'').slice(0,2500);
+  const clean=text.replace(/<[^>]+>/g,'').replace(/\*\*/g,'').slice(0,500);
   try{
     const res=await fetch(`https://api.elevenlabs.io/v1/text-to-speech/dajyHYsFViAKDAwOeHy7`,{method:'POST',headers:{'Content-Type':'application/json','xi-api-key':ELEVEN_KEY},body:JSON.stringify({text:clean,model_id:'eleven_turbo_v2_5',voice_settings:{stability:0.4,similarity_boost:0.85,style:0.3,use_speaker_boost:true}})});
     if(!res.ok) throw new Error('ElevenLabs failed');
     const blob=await res.blob();const url=URL.createObjectURL(blob);const audio=new Audio(url);audio.play();audio.onended=()=>URL.revokeObjectURL(url);
   }catch(e){
-    console.log('ElevenLabs failed, using browser TTS',e);
+    const res2=await fetch('/speak',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:clean})});
+    if(!res.ok) throw new Error('ElevenLabs failed');
+    const blob=await res.blob();
+    const url=URL.createObjectURL(blob);
+    const audio=new Audio(url);
+    audio.play();
+    audio.onended=()=>URL.revokeObjectURL(url);
+  }catch{
     if(!('speechSynthesis' in window))return;
     speechSynthesis.cancel();
     const utt=new SpeechSynthesisUtterance(clean);
@@ -477,8 +499,3 @@ if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch
 </script>
 </body>
 </html>
-
-
-
-
-
