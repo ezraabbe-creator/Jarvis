@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -140,7 +140,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 <div class="topbar">
   <div class="logo">
     <div class="logo-icon"><div class="logo-core"></div></div>
-    <div><div class="logo-txt">J.A.R.V.I.S.</div><div class="logo-ver">VER 2.0 · STARK INDUSTRIES</div></div>
+    <div><div class="logo-txt">J.A.R.V.I.S.</div><div class="logo-ver">VER 2.0 Â· STARK INDUSTRIES</div></div>
   </div>
   <div class="top-center">
     <div class="top-stat"><div class="top-stat-n" id="s-mem">0</div><div class="top-stat-l">Memory</div></div>
@@ -159,7 +159,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 <div class="left">
   <div class="pblock">
     <div class="plabel">Voice Interface</div>
-    <button id="vbtn"><span>⬤</span><span id="vlbl">ACTIVATE MIC</span></button>
+    <button id="vbtn"><span>â¬¤</span><span id="vlbl">ACTIVATE MIC</span></button>
     <div class="wvform" id="wvf"><div class="wbar"></div><div class="wbar"></div><div class="wbar"></div><div class="wbar"></div><div class="wbar"></div></div>
     <label class="ttsrow"><input type="checkbox" id="ttsc" checked/>Speak responses</label>
   </div>
@@ -174,6 +174,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
       <button class="qbtn" onclick="window.location.href='/auth/google'">GOOGLE AUTH</button>
     </div>
   </div>
+  <div class="pblock"><div class="plabel">Projects</div><button onclick="window.open('https://docs.google.com/document/d/1xa34Ix7-pBrfw65LP2DbQzceZxNcPQxXocFyMNvSKuw/edit','_blank')" style="width:100%;background:transparent;border:1px solid rgba(255,140,0,0.4);color:var(--orange);font-family:var(--font-hud);font-size:0.5rem;letter-spacing:0.12em;padding:9px;cursor:pointer;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:8px;"><span>&#9672;</span> MARK PROJECT</button></div>
   <div class="pblock grow">
     <div class="plabel">Tool Activity</div>
     <div id="tlog"><span style="font-size:0.56rem;color:var(--muted);">IDLE</span></div>
@@ -278,10 +279,10 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
     <div class="pblock">
       <div class="plabel">Integrations</div>
       <div class="irow"><span class="iname">ANTHROPIC</span><span style="color:var(--green);font-size:0.6rem;">ONLINE</span></div>
-      <div class="irow"><span class="iname">GOOGLE</span><span id="gs" style="color:var(--dim);font-size:0.6rem;">—</span></div>
-      <div class="irow"><span class="iname">CANVAS</span><span id="cs" style="color:var(--dim);font-size:0.6rem;">—</span></div>
-      <div class="irow"><span class="iname">WEATHER</span><span id="ws2" style="color:var(--dim);font-size:0.6rem;">—</span></div>
-      <div class="irow"><span class="iname">WEBSOCKET</span><span id="wss" style="color:var(--dim);font-size:0.6rem;">—</span></div>
+      <div class="irow"><span class="iname">GOOGLE</span><span id="gs" style="color:var(--dim);font-size:0.6rem;">â€”</span></div>
+      <div class="irow"><span class="iname">CANVAS</span><span id="cs" style="color:var(--dim);font-size:0.6rem;">â€”</span></div>
+      <div class="irow"><span class="iname">WEATHER</span><span id="ws2" style="color:var(--dim);font-size:0.6rem;">â€”</span></div>
+      <div class="irow"><span class="iname">WEBSOCKET</span><span id="wss" style="color:var(--dim);font-size:0.6rem;">â€”</span></div>
     </div>
     <div class="pblock">
       <div class="plabel">Active Memory</div>
@@ -350,7 +351,7 @@ function connectWS(){
 connectWS();
 
 function handle(msg){
-  if(msg.type==='thinking'){const t=document.getElementById('tmsg');if(t)t.querySelector('.ttext').textContent=msg.text.slice(0,55)+'…';}
+  if(msg.type==='thinking'){const t=document.getElementById('tmsg');if(t)t.querySelector('.ttext').textContent=msg.text.slice(0,55)+'â€¦';}
   else if(msg.type==='tools'){
     iterCount++;toolCount+=msg.tools.length;
     document.getElementById('s-iter').textContent=iterCount;
@@ -480,5 +481,6 @@ if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch
 </script>
 </body>
 </html>
+
 
 
