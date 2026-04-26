@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -221,7 +221,7 @@ body.create-mode .left{border-right:1px solid rgba(0,200,240,0.2);}
 <div class="topbar">
   <div class="logo">
     <div class="logo-icon"><div class="logo-core"></div></div>
-    <div><div class="logo-txt">J.A.R.V.I.S.</div><div class="logo-ver">VER 2.0 · STARK INDUSTRIES</div></div>
+    <div><div class="logo-txt">J.A.R.V.I.S.</div><div class="logo-ver">VER 2.0 Â· STARK INDUSTRIES</div></div>
   </div>
   <div class="top-center">
     <div class="top-stat"><div class="top-stat-n" id="s-mem">0</div><div class="top-stat-l">Memory</div></div>
@@ -243,7 +243,7 @@ body.create-mode .left{border-right:1px solid rgba(0,200,240,0.2);}
 <div class="left">
   <div class="pblock">
     <div class="plabel">Voice Interface</div>
-    <button id="vbtn"><span>⬤</span><span id="vlbl">ACTIVATE MIC</span></button>
+    <button id="vbtn"><span>â¬¤</span><span id="vlbl">ACTIVATE MIC</span></button>
     <div class="wvform" id="wvf"><div class="wbar"></div><div class="wbar"></div><div class="wbar"></div><div class="wbar"></div><div class="wbar"></div></div>
     <label class="ttsrow"><input type="checkbox" id="ttsc" checked/>Speak responses</label>
   </div>
@@ -263,7 +263,7 @@ body.create-mode .left{border-right:1px solid rgba(0,200,240,0.2);}
     <div id="tlog"><span style="font-size:0.56rem;color:var(--muted);">IDLE</span></div>
   </div>
   <div class="pblock">
-    <div class="plabel">Agent Status</div>
+    <div class="pblock"><div class="plabel">Projects</div><button onclick="window.open('https://docs.google.com/document/d/1xa34Ix7-pBrfw65LP2DbQzceZxNcPQxXocFyMNvSKuw/edit','_blank')" style="width:100%;background:transparent;border:1px solid rgba(255,140,0,0.4);color:var(--orange);font-family:var(--font-hud);font-size:0.5rem;letter-spacing:0.12em;padding:9px;cursor:pointer;transition:all 0.2s;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:8px;" onmouseover="this.style.background='rgba(255,140,0,0.1)'" onmouseout="this.style.background='transparent'"><span>&#9672;</span> MARK PROJECT</button></div><<div class="plabel">Agent Status</div>
     <div class="pips">
       <div class="pip" id="p0"></div><div class="pip" id="p1"></div><div class="pip" id="p2"></div><div class="pip" id="p3"></div><div class="pip" id="p4"></div>
       <div class="pip" id="p5"></div><div class="pip" id="p6"></div><div class="pip" id="p7"></div><div class="pip" id="p8"></div><div class="pip" id="p9"></div>
@@ -383,10 +383,10 @@ body.create-mode .left{border-right:1px solid rgba(0,200,240,0.2);}
     <div class="pblock">
       <div class="plabel">Integrations</div>
       <div class="irow"><span class="iname">ANTHROPIC</span><span style="color:var(--green);font-size:0.6rem;">ONLINE</span></div>
-      <div class="irow"><span class="iname">GOOGLE</span><span id="gs" style="color:var(--dim);font-size:0.6rem;">—</span></div>
-      <div class="irow"><span class="iname">CANVAS</span><span id="cs" style="color:var(--dim);font-size:0.6rem;">—</span></div>
-      <div class="irow"><span class="iname">WEATHER</span><span id="ws2" style="color:var(--dim);font-size:0.6rem;">—</span></div>
-      <div class="irow"><span class="iname">WEBSOCKET</span><span id="wss" style="color:var(--dim);font-size:0.6rem;">—</span></div>
+      <div class="irow"><span class="iname">GOOGLE</span><span id="gs" style="color:var(--dim);font-size:0.6rem;">â€”</span></div>
+      <div class="irow"><span class="iname">CANVAS</span><span id="cs" style="color:var(--dim);font-size:0.6rem;">â€”</span></div>
+      <div class="irow"><span class="iname">WEATHER</span><span id="ws2" style="color:var(--dim);font-size:0.6rem;">â€”</span></div>
+      <div class="irow"><span class="iname">WEBSOCKET</span><span id="wss" style="color:var(--dim);font-size:0.6rem;">â€”</span></div>
     </div>
     <div class="pblock">
       <div class="plabel">Active Memory</div>
@@ -458,7 +458,7 @@ function connectWS(){
 connectWS();
 
 function handle(msg){
-  if(msg.type==='thinking'){const t=document.getElementById('tmsg');if(t)t.querySelector('.ttext').textContent=msg.text.slice(0,55)+'…';}
+  if(msg.type==='thinking'){const t=document.getElementById('tmsg');if(t)t.querySelector('.ttext').textContent=msg.text.slice(0,55)+'â€¦';}
   else if(msg.type==='tools'){
     iterCount++;toolCount+=msg.tools.length;
     document.getElementById('s-iter').textContent=iterCount;
@@ -574,7 +574,7 @@ function startL(){listening=true;vbtn.classList.add('listening');vlbl.textConten
 function stopL(){listening=false;vbtn.classList.remove('listening');vlbl.textContent='ACTIVATE MIC';wvf.classList.remove('on');try{recognition.stop();}catch{}}
 
 
-// ── CREATE MODE & THREE.JS WORKSPACE ─────────────────────────────────────────
+// â”€â”€ CREATE MODE & THREE.JS WORKSPACE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let threeScene, threeCamera, threeRenderer, threeModel, animFrame;
 let createModeActive = false;
 
@@ -586,7 +586,7 @@ function toggleCreateMode() {
   if (createModeActive) {
     overlay.classList.add('active');
     btn.classList.add('active');
-    btn.textContent = '✦ EXIT CREATE';
+    btn.textContent = 'âœ¦ EXIT CREATE';
     document.body.classList.add('create-mode');
     initThree();
   } else {
@@ -681,7 +681,7 @@ function spawnDefaultModel() {
   threeScene.add(group);
   threeModel = group;
   
-  document.getElementById('ws-status').textContent = 'DEFAULT MODEL — DESCRIBE YOURS ABOVE';
+  document.getElementById('ws-status').textContent = 'DEFAULT MODEL â€” DESCRIBE YOURS ABOVE';
   document.getElementById('export-btn').disabled = false;
 }
 
@@ -695,7 +695,7 @@ async function generateModel() {
   const prompt = document.getElementById('model-prompt').value.trim();
   if (!prompt) return;
   
-  document.getElementById('ws-status').textContent = 'MESHY API NOT YET CONFIGURED — SHOWING PLACEHOLDER';
+  document.getElementById('ws-status').textContent = 'MESHY API NOT YET CONFIGURED â€” SHOWING PLACEHOLDER';
   
   // Placeholder: morph the cube based on prompt keywords
   if (threeModel) threeScene.remove(threeModel);
@@ -725,7 +725,7 @@ async function generateModel() {
   threeScene.add(group);
   threeModel = group;
   
-  document.getElementById('ws-status').textContent = `PLACEHOLDER: "${prompt.toUpperCase()}" — ADD MESHY KEY TO GENERATE REAL 3D`;
+  document.getElementById('ws-status').textContent = `PLACEHOLDER: "${prompt.toUpperCase()}" â€” ADD MESHY KEY TO GENERATE REAL 3D`;
   document.getElementById('export-btn').disabled = false;
 }
 
@@ -756,3 +756,4 @@ if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch
 </div>
 </body>
 </html>
+
