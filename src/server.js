@@ -24,7 +24,7 @@ async function callGemini(messages, systemPrompt) {
     if(text) contents.push({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text }] });
   }
   const body = { system_instruction: { parts: [{ text: systemPrompt }] }, contents };
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`, {
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
   });
   const data = await res.json();
@@ -743,6 +743,7 @@ server.listen(PORT, () => {
   console.log(`?? Google: ${isGoogleAuthed() ? 'Connected' : 'Not connected � visit /auth/google'}`);
   console.log(`?? Canvas: ${process.env.CANVAS_API_TOKEN ? 'Configured' : 'Not configured'}\n`);
 });
+
 
 
 
