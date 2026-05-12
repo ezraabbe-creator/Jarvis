@@ -388,7 +388,7 @@ async function executeTool(name, input) {
           const endIndex = doc.data.body.content.reduce((max, el) => Math.max(max, el.endIndex || 0), 1);
           await docs.documents.batchUpdate({ documentId: id, requestBody: { requests: [{ insertText: { location: { index: endIndex - 1 }, text: '\n' + input.content } }] } });
         }
-        return `Updated doc successfully. Link: https://docs.google.com/document/d/${extractId(input.doc_id)}/edit`;
+        return `Updated doc: https://docs.google.com/document/d/${id}/edit`;
       }
       case 'read_google_slides': {
         if (!isGoogleAuthed()) return 'Google not connected.';
@@ -743,6 +743,7 @@ server.listen(PORT, () => {
   console.log(`?? Google: ${isGoogleAuthed() ? 'Connected' : 'Not connected � visit /auth/google'}`);
   console.log(`?? Canvas: ${process.env.CANVAS_API_TOKEN ? 'Configured' : 'Not configured'}\n`);
 });
+
 
 
 
